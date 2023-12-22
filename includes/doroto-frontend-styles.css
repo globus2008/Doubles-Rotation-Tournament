@@ -1,0 +1,114 @@
+.doroto-special-group-text {
+    color: blue;
+}
+
+.doroto-special-group-text-underlined {
+    color: blue;
+	text-decoration: underline;
+}
+.doroto-winner-text {
+    color: red;
+}
+
+.doroto-winner-background {
+    background-color: LightPink !important;
+}
+
+.doroto-separator-background {
+    background-color: Orange !important;
+}
+
+.doroto-info-text {
+    color: green;
+}
+
+.doroto-warning-text {
+    color: red;
+}
+.doroto-table-width {
+    width: 70%;
+}
+
+.doroto-table-width-red {
+    width: 70%;
+	color: red;
+}
+
+.doroto-table {
+    width: 100%;	
+}
+
+.doroto-clickable-title {
+    cursor: pointer;
+	background-color: gainsboro; 
+}
+
+.doroto-content-container {
+    display: none;
+}
+
+.doroto-content-main {
+    margin-top: 10px; 
+    margin-bottom: 15px; 
+}
+
+.doroto-table-responsive {
+    overflow-x: auto;
+}
+
+.doroto-table-responsive table tbody tr:nth-child(2n+1) { /*each table will have a zebra, i.e. the second row is a different color*/
+    background-color: #f2f2f2;
+}
+
+.doroto-table-responsive table tr:first-child { /*each table will have a different colored label*/
+    background-color: #ffcc99 !important;
+}
+#tournament_parameters_allow_quit {
+    width: 100%;  
+}
+
+#tournament_parameters_allow_quit option {
+    height: 150px; 
+    overflow: auto; 
+    text-overflow: ellipsis;
+}
+#tournament_parameters_name {
+    height: 50px;
+	width: 100%; 
+}
+#tournament_parameters_whole_names {
+	width: 100%; 
+}
+#tournament_parameters_whole_names option {
+    height: 150px; 
+    overflow: auto; 
+    text-overflow: ellipsis;
+}
+
+.doroto-red-text {
+    color: red;
+}
+
+.doroto-text-underlined { /* Text underlining */
+    text-decoration: underline;
+}
+
+
+.doroto-grey-background {
+        background-color: #f2f2f2; /* You can use any gray color here */
+        padding: 10px;
+        border: 1px solid #ccc; /* You can optionally add a border */
+    }
+.doroto-other-background {
+        background-color: #FAF0E6; 
+        padding: 10px;
+        border: 1px solid #ccc; /* You can optionally add a border */
+    }
+
+.doroto-select-width {
+    width: 300px;
+	}
+
+.doroto-left-aligned {
+        text-align: left;
+	}
