@@ -77,7 +77,9 @@ global $doroto_output_form;
 
  // @version 1.0.0 
 function doroto_check_version() {
-	if( defined( 'IFRAME_REQUEST' ) ) { return; }
+	if( defined( 'IFRAME_REQUEST' ) ) { 
+		return; 
+	}
 	$old_version = get_option( 'doroto_version' );
 	if(!$old_version) {
 		$old_version = '0.0.0';
@@ -92,8 +94,7 @@ function doroto_check_version() {
 	}
 	
 	if(($version_2 <= 1 && $version_3 < 1) || $version_2 < 1) {
-		//update by version, nothing needed now
-		
+		//update by version, nothing needed now		
 	}
 	if( $old_version !== doroto_VERSION ) {
 		update_option('doroto_version',doroto_VERSION);
@@ -103,7 +104,9 @@ add_action( 'init', 'doroto_check_version', 5 );
 
 function doroto_enqueue_libraries_scripts() {
 	// On backend
-	if( is_admin() ) return; 
+	if( is_admin() ) {
+		return; 
+	}
 
 	$tiptip_version            = '1.3';
 	$registered_tiptip         = wp_scripts()->query( 'jquery-tiptip', 'registered' );
@@ -111,7 +114,9 @@ function doroto_enqueue_libraries_scripts() {
 	if( ! $registered_tiptip || ( $registered_tiptip_version && version_compare( $registered_tiptip_version, $tiptip_version, '<' ) ) ) { 
 		wp_register_script( 'jquery-tiptip', plugins_url( 'lib/jquery-tiptip/jquery.tipTip.min.js', __FILE__ ), array( 'jquery' ), $tiptip_version, true );
 	}
-	if( ! wp_script_is( 'jquery-tiptip', 'enqueued' ) ) { wp_enqueue_script( 'jquery-tiptip' ); }
+	if( ! wp_script_is( 'jquery-tiptip', 'enqueued' ) ) { 
+		wp_enqueue_script( 'jquery-tiptip' ); 
+	}
 }
 add_action( 'admin_enqueue_scripts', 'doroto_enqueue_libraries_scripts', 9 );
 add_action( 'wp_enqueue_scripts', 'doroto_enqueue_libraries_scripts', 9 );

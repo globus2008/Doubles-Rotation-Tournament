@@ -1,7 +1,13 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
-//content of the shortcode admin page 
+
+/**
+ * content of the shortcode admin page 
+ * @since 1.0.0
+ */
 function doroto_menu_page_content() {
     $output = "<h1>" . esc_html__( 'Overview of the available shortcode functions of the Doubles Rotation Tournament plugin.', 'doubles-rotation-tournament' ) . "</h1>";	
 	$output .= "<h3>" . esc_html__( 'Contribute to the sustainable development of this plugin by using', 'doubles-rotation-tournament' ) . " <a href='" . esc_url( 'https://www.paypal.com/donate/?business=S295WXEHMKLF6&no_recurring=0&item_name=Contribution+to+the+development+of+Wordpress+plugin+Doubles+rotation+tournament.&currency_code=EUR' ) . "' target='_blank'>Paypal</a> " . esc_html__( 'gate.', 'doubles-rotation-tournament' ) . "</h3>";
@@ -142,7 +148,11 @@ function doroto_menu_page_content() {
     return $output;
 }
 
-//shortcode for page with shortcodes
+
+/**
+ * shortcode for page with shortcodes
+ * @since 1.0.0
+ */
 function doroto_shortcodes_menu_page_callback() { 
 	$allowed_html = doroto_allowed_html();
     echo '<div class="wrap">';
@@ -150,7 +160,11 @@ function doroto_shortcodes_menu_page_callback() {
     echo '</div>';
 }
 
-//callback for admin homepage
+
+/**
+ * callback for admin homepage
+ * @since 1.0.0
+ */
 function doroto_home_menu_page_callback() { 
 	$allowed_html = doroto_allowed_html();
     echo '<div class="wrap">';
@@ -158,7 +172,11 @@ function doroto_home_menu_page_callback() {
     echo '</div>';
 }
 
-//create admin menu
+
+/**
+ * create admin menu
+ * @since 1.0.0
+ */
 function doroto_create_menu() {
     $icon_url = 'dashicons-awards';
 	$menu_slug = 'doubles-rotation-tournament';
@@ -169,18 +187,22 @@ function doroto_create_menu() {
 }
 add_action( 'admin_menu', 'doroto_create_menu' );
 
-//preparation for admin environmental settings page
+
+/**
+ * preparation for admin environmental settings page
+ * @since 1.0.0
+ */
 function doroto_register_settings() {
     add_settings_section(
         'doroto_settings_section',		
-         esc_html__("Settings","doubles-rotation-tournament"),
+         sanitize_text_field( __("Settings","doubles-rotation-tournament") ),
         'doroto_settings_section_callback',
         'doubles-rotation-tournament-settings' 
     );
 
     add_settings_field(
         'doroto_settings_options',
-        esc_html__("Environment settings","doubles-rotation-tournament"),
+         sanitize_text_field( __("Environment settings","doubles-rotation-tournament") ),
         'doroto_settings_options_callback',
         'doubles-rotation-tournament-settings',   // name of an existing page
         'doroto_settings_section'
@@ -188,7 +210,7 @@ function doroto_register_settings() {
 	
     add_settings_field(
         'doroto_presentation_options',
-        esc_html__("Presentation settings","doubles-rotation-tournament"),
+         sanitize_text_field(__("Presentation settings","doubles-rotation-tournament") ),
         'doroto_presentation_options_callback',
         'doubles-rotation-tournament-settings',   
         'doroto_settings_section'
@@ -196,35 +218,49 @@ function doroto_register_settings() {
 	
     add_settings_field(
         'doroto_data_options',
-        esc_html__("Uninstall and activate","doubles-rotation-tournament"),
+         sanitize_text_field(__("Uninstall and activate","doubles-rotation-tournament") ),
         'doroto_data_options_callback',
-        'doubles-rotation-tournament-settings',  // name of an existing page
+        'doubles-rotation-tournament-settings',  
         'doroto_settings_section'
     );
     register_setting('doroto_settings', 'doroto_settings', 'doroto_sanitize_settings');
 }
 
-//sanitize attribute 'display_rows' for tournament´s functions
+
+/**
+ * sanitize attribute 'display_rows' for tournament´s functions
+ * @since 1.0.0
+ */
 function doroto_sanitize_settings($input) {
     $input['display_rows'] = isset($input['display_rows']) ? intval($input['display_rows']) : 0;
     return $input;
 }
 
-//label for admin page
+
+/**
+ * label for admin page
+ * @since 1.0.0
+ */
 function doroto_settings_section_callback() {
     echo '<p>'.esc_html__("Here you can set restrictions for tournament administration from the website administrator's point of view.","doubles-rotation-tournament").'</p>';
 }
 
-//content of admin enviromental setting page
+
+/**
+ * content of admin enviromental setting page
+ * @since 1.0.0
+ */
 function doroto_settings_options_callback() {
 
 	$doroto_settings = get_option('doroto_settings');
 
-    $only_admin_players = isset($doroto_settings['only_admin_players']) ? esc_attr($doroto_settings['only_admin_players']) : '';
-	$only_admin_posts = isset($doroto_settings['only_admin_posts']) ? esc_attr($doroto_settings['only_admin_posts']) : '';
-    $display_rows = isset($doroto_settings['display_rows']) ? esc_attr($doroto_settings['display_rows']) : '';
- 	$refresh_seconds = isset($doroto_settings['refresh_seconds']) ? esc_attr($doroto_settings['refresh_seconds']) : '';
-	$only_admin_creates = isset($doroto_settings['only_admin_creates']) ? esc_attr($doroto_settings['only_admin_creates']) : '';
+    $only_admin_players = isset($doroto_settings['only_admin_players']) ? intval($doroto_settings['only_admin_players']) : '';
+	$only_admin_posts = isset($doroto_settings['only_admin_posts']) ? intval($doroto_settings['only_admin_posts']) : '';
+    $display_rows = isset($doroto_settings['display_rows']) ? intval($doroto_settings['display_rows']) : '';
+ 	$refresh_seconds = isset($doroto_settings['refresh_seconds']) ? intval($doroto_settings['refresh_seconds']) : '';
+	$only_admin_creates = isset($doroto_settings['only_admin_creates']) ? intval($doroto_settings['only_admin_creates']) : '';
+	$player_name_length = isset($doroto_settings['player_name_length']) ? intval($doroto_settings['player_name_length']) : '';
+	$youtube_link = isset($doroto_settings['youtube_link']) ? sanitize_text_field( wp_unslash($doroto_settings['youtube_link'])) : '';
 	
 	echo '<table class="wp-list-table widefat fixed striped table-view-list forms doroto-admin-enlarged-table">';
 
@@ -233,8 +269,8 @@ function doroto_settings_options_callback() {
     echo '<th scope="row"><label for="doroto_settings_only_admin_players">' . esc_html__('Can only the site administrator work with the player database?', 'doubles-rotation-tournament') . '</label></th>';
     echo '<td>';
     echo '<select name="doroto_settings[only_admin_players]">';
-   	echo '<option value="1" ' . selected(1, $only_admin_players, false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
-	echo '<option value="0" ' . selected(0, $only_admin_players, false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
+   	echo '<option value="1" ' . selected(1, esc_attr($only_admin_players), false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
+	echo '<option value="0" ' . selected(0, esc_attr($only_admin_players), false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
     echo '</select>';
     echo '<p class="description">' . esc_html__("By default, this is enabled by the site administrator. Otherwise, anyone can be allowed to view usernames and add them to their tournament.", "doubles-rotation-tournament") .' '. esc_html__("This setting has lower priority than using an attribute in the shortcode.", "doubles-rotation-tournament").'</p>';
     echo '</td>';
@@ -246,7 +282,7 @@ function doroto_settings_options_callback() {
     echo '<td>';
     echo '<select id="doroto_settings_display_rows" name="doroto_settings[display_rows]">';
 	for ($i = 0; $i <= 100; $i++) {
-		echo '<option value="' . esc_attr($i) . '" ' . selected($i, $display_rows, false) . '>' . esc_html($i) . '</option>';
+		echo '<option value="' . esc_attr($i) . '" ' . selected(esc_attr($i), esc_attr($display_rows), false) . '>' . esc_html($i) . '</option>';
 	}
 	echo '</select>';
     echo '<p class="description">' . esc_html__('Enter a value between 0 and 100 for display rows.', 'doubles-rotation-tournament') . '</p>';
@@ -258,8 +294,8 @@ function doroto_settings_options_callback() {
     echo '<th scope="row"><label for="doroto_settings_only_admin_posts">' . esc_html__('Allow the tournament organizer to create a post to promote and administer the tournament?', 'doubles-rotation-tournament') . '</label></th>';
     echo '<td>';
     echo '<select name="doroto_settings[only_admin_posts]">';
-   	echo '<option value="0" ' . selected(0, $only_admin_posts, false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
-	echo '<option value="1" ' . selected(1, $only_admin_posts, false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
+   	echo '<option value="0" ' . selected(0, esc_attr($only_admin_posts), false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
+	echo '<option value="1" ' . selected(1, esc_attr($only_admin_posts), false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
     echo '</select>';
     echo '<p class="description">' . esc_html__("By default, this is enabled by the site administrator. Otherwise, anyone can create a post.", "doubles-rotation-tournament") . '</p>';
     echo '</td>';
@@ -271,7 +307,7 @@ function doroto_settings_options_callback() {
     echo '<td>';
     echo '<select id="doroto_settings_refresh_seconds" name="doroto_settings[refresh_seconds]">';
 	for ($i = 0; $i <= 1000; $i+=10) {
-   	 	echo '<option value="' . esc_attr($i) . '" ' . selected($i, $refresh_seconds, false) . '>' . esc_html($i) . '</option>';		
+   	 	echo '<option value="' . esc_attr($i) . '" ' . selected(esc_attr($i), esc_attr($refresh_seconds), false) . '>' . esc_html($i) . '</option>';		
 	}
 	echo '</select>';
     echo '<p class="description">' . esc_html__('Enter a value between 0 and 1000 for the number of seconds.', 'doubles-rotation-tournament') .' '. esc_html__("This setting has lower priority than using an attribute in the shortcode.", "doubles-rotation-tournament"). '</p>';
@@ -283,26 +319,52 @@ function doroto_settings_options_callback() {
     echo '<th scope="row"><label for="doroto_settings_only_admin_creates">' . esc_html__('Can only a website administrator create a new tournament?', 'doubles-rotation-tournament') . '</label></th>';
     echo '<td>';
     echo '<select name="doroto_settings[only_admin_creates]">';
-   	echo '<option value="1" ' . selected(1, $only_admin_creates, false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
-	echo '<option value="0" ' . selected(0, $only_admin_creates, false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
+   	echo '<option value="1" ' . selected(1, esc_attr($only_admin_creates), false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
+	echo '<option value="0" ' . selected(0, esc_attr($only_admin_creates), false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
     echo '</select>';
     echo '<p class="description">' . esc_html__("By default, this is enabled by everybody who is logged in. Otherwise, only an administrator, editor or author can create a tournament.", "doubles-rotation-tournament") . '</p>';
     echo '</td>';
-    echo '</tr>';    
+    echo '</tr>';  
+	
+	    // settings 'display name maximal length'
+    echo '<tr class="iedit">';
+    echo '<th scope="row"><label for="doroto_settings_player_name_length">' . esc_html__('Enter the maximum number of characters allowed in the players display name.') . '</label></th>';
+    echo '<td>';
+    echo '<select id="doroto_settings_player_name_length" name="doroto_settings[player_name_length]">';
+	for ($i = 5; $i <= 30; $i+=1) {
+   	 	echo '<option value="' . esc_attr($i) . '" ' . selected($i, esc_attr($player_name_length), false) . '>' . esc_html($i) . '</option>';		
+	}
+	echo '</select>';
+    echo '<p class="description">' . esc_html__('Enter a value between 5 and 30 for the number of characters.', 'doubles-rotation-tournament') . '</p>';
+    echo '</td>';
+    echo '</tr>';
+	
+	// settings 'youtube_link'
+	echo '<tr class="alternate">';
+	echo '<th scope="row"><label for="doroto_settings_youtube_link">' . esc_html__('YouTube Video Link with a help.', 'doubles-rotation-tournament') . '</label></th>';
+	echo '<td>';
+	echo '<input type="text" name="doroto_settings[youtube_link]" value="' . esc_attr($youtube_link) . '" />';
+	echo '<p class="description">' . esc_html__('Enter the YouTube video link.', 'doubles-rotation-tournament') . ' '.  esc_html__('If you leave the field blank, the help video will not be displayed.', 'doubles-rotation-tournament') . '</p>';
+	echo '</td>';
+	echo '</tr>'; 
     echo '</table>';
 }
 
-//content of admin presentation setting page
+
+/**
+ * content of admin presentation setting page
+ * @since 1.0.0
+ */
 function doroto_presentation_options_callback() {
 	$doroto_settings = get_option('doroto_settings');
 
-	$show_next_seconds = isset($doroto_settings['show_next_seconds']) ? esc_attr($doroto_settings['show_next_seconds']) : '';	
-    $doroto_tournament_log_link = isset($doroto_settings['doroto_tournament_log_link']) ? esc_attr($doroto_settings['doroto_tournament_log_link']) : '';
-	$doroto_games_to_play = isset($doroto_settings['doroto_games_to_play']) ? esc_attr($doroto_settings['doroto_games_to_play']) : '';	
-    $doroto_display_players = isset($doroto_settings['doroto_display_players']) ? esc_attr($doroto_settings['doroto_display_players']) : '';
- 	$doroto_display_games = isset($doroto_settings['doroto_display_games']) ? esc_attr($doroto_settings['doroto_display_games']) : '';
-	$doroto_display_player_statistics = isset($doroto_settings['doroto_display_player_statistics']) ? esc_attr($doroto_settings['doroto_display_player_statistics']) : '';
-	$doroto_table = isset($doroto_settings['doroto_table']) ? esc_attr($doroto_settings['doroto_table']) : '';
+	$show_next_seconds = isset($doroto_settings['show_next_seconds']) ? intval($doroto_settings['show_next_seconds']) : '';	
+    $doroto_tournament_log_link = isset($doroto_settings['doroto_tournament_log_link']) ? intval($doroto_settings['doroto_tournament_log_link']) : '';
+	$doroto_games_to_play = isset($doroto_settings['doroto_games_to_play']) ? intval($doroto_settings['doroto_games_to_play']) : '';	
+    $doroto_display_players = isset($doroto_settings['doroto_display_players']) ? intval($doroto_settings['doroto_display_players']) : '';
+ 	$doroto_display_games = isset($doroto_settings['doroto_display_games']) ? intval($doroto_settings['doroto_display_games']) : '';
+	$doroto_display_player_statistics = isset($doroto_settings['doroto_display_player_statistics']) ? intval($doroto_settings['doroto_display_player_statistics']) : '';
+	$doroto_table = isset($doroto_settings['doroto_table']) ? intval($doroto_settings['doroto_table']) : '';
 	
 	echo '<table class="wp-list-table widefat fixed striped table-view-list forms doroto-admin-enlarged-table">';
 
@@ -311,8 +373,8 @@ function doroto_presentation_options_callback() {
     echo '<th scope="row"><label for="doroto_settings_doroto_tournament_log_link"> [doroto_tournament_log_link] </label></th>';
     echo '<td>';
     echo '<select name="doroto_settings[doroto_tournament_log_link]">';
-   	echo '<option value="1" ' . selected(1, $doroto_tournament_log_link, false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
-	echo '<option value="0" ' . selected(0, $doroto_tournament_log_link, false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
+   	echo '<option value="1" ' . selected(1, esc_attr($doroto_tournament_log_link), false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
+	echo '<option value="0" ' . selected(0, esc_attr($doroto_tournament_log_link), false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
     echo '</select>';
     echo '<p class="description">' . esc_html__("Display the output from this shortcode while the tournament presentation is on?", "doubles-rotation-tournament") .'</p>';
     echo '</td>';
@@ -323,8 +385,8 @@ function doroto_presentation_options_callback() {
     echo '<th scope="row"><label for="doroto_settings_doroto_games_to_play"> [doroto_games_to_play] </label></th>';
     echo '<td>';
     echo '<select name="doroto_settings[doroto_games_to_play]">';
-   	echo '<option value="1" ' . selected(1, $doroto_games_to_play, false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
-	echo '<option value="0" ' . selected(0, $doroto_games_to_play, false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
+   	echo '<option value="1" ' . selected(1, esc_attr($doroto_games_to_play), false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
+	echo '<option value="0" ' . selected(0, esc_attr($doroto_games_to_play), false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
     echo '</select>';
     echo '<p class="description">' . esc_html__("Display the output from this shortcode while the tournament presentation is on?", "doubles-rotation-tournament") . '</p>';
     echo '</td>';
@@ -335,8 +397,8 @@ function doroto_presentation_options_callback() {
     echo '<th scope="row"><label for="doroto_settings_doroto_display_players"> [doroto_display_players] </label></th>';
     echo '<td>';
     echo '<select name="doroto_settings[doroto_display_players]">';
-   	echo '<option value="1" ' . selected(1, $doroto_display_players, false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
-	echo '<option value="0" ' . selected(0, $doroto_display_players, false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
+   	echo '<option value="1" ' . selected(1, esc_attr($doroto_display_players), false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
+	echo '<option value="0" ' . selected(0, esc_attr($doroto_display_players), false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
     echo '</select>';
     echo '<p class="description">' . esc_html__("Display the output from this shortcode while the tournament presentation is on?", "doubles-rotation-tournament") .'</p>';
     echo '</td>';
@@ -347,8 +409,8 @@ function doroto_presentation_options_callback() {
     echo '<th scope="row"><label for="doroto_settings_doroto_display_games"> [doroto_display_games] </label></th>';
     echo '<td>';
     echo '<select name="doroto_settings[doroto_display_games]">';
-   	echo '<option value="1" ' . selected(1, $doroto_display_games, false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
-	echo '<option value="0" ' . selected(0, $doroto_display_games, false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
+   	echo '<option value="1" ' . selected(1, esc_attr($doroto_display_games), false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
+	echo '<option value="0" ' . selected(0, esc_attr($doroto_display_games), false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
     echo '</select>';
     echo '<p class="description">' . esc_html__("Display the output from this shortcode while the tournament presentation is on?", "doubles-rotation-tournament") . '</p>';
     echo '</td>';
@@ -359,8 +421,8 @@ function doroto_presentation_options_callback() {
     echo '<th scope="row"><label for="doroto_settings_doroto_display_player_statistics"> [doroto_display_player_statistics] </label></th>';
     echo '<td>';
     echo '<select name="doroto_settings[doroto_display_player_statistics]">';
-   	echo '<option value="1" ' . selected(1, $doroto_display_player_statistics, false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
-	echo '<option value="0" ' . selected(0, $doroto_display_player_statistics, false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
+   	echo '<option value="1" ' . selected(1, esc_attr($doroto_display_player_statistics), false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
+	echo '<option value="0" ' . selected(0, esc_attr($doroto_display_player_statistics), false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
     echo '</select>';
     echo '<p class="description">' . esc_html__("Display the output from this shortcode while the tournament presentation is on?", "doubles-rotation-tournament") .'</p>';
     echo '</td>';
@@ -371,8 +433,8 @@ function doroto_presentation_options_callback() {
     echo '<th scope="row"><label for="doroto_settings_doroto_table"> [doroto_table] </label></th>';
     echo '<td>';
     echo '<select name="doroto_settings[doroto_table]">';
-   	echo '<option value="1" ' . selected(1, $doroto_table, false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
-	echo '<option value="0" ' . selected(0, $doroto_table, false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
+   	echo '<option value="1" ' . selected(1, esc_attr($doroto_table), false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
+	echo '<option value="0" ' . selected(0, esc_attr($doroto_table), false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
     echo '</select>';
     echo '<p class="description">' . esc_html__("Display the output from this shortcode while the tournament presentation is on?", "doubles-rotation-tournament") . '</p>';
     echo '</td>';
@@ -384,7 +446,7 @@ function doroto_presentation_options_callback() {
     echo '<td>';
     echo '<select id="doroto_settings_show_next_seconds" name="doroto_settings[show_next_seconds]">';
 	for ($i = 1; $i <= 120; $i+=1) {
-   	 	echo '<option value="' . esc_attr($i) . '" ' . selected($i, $show_next_seconds, false) . '>' . esc_html($i) . '</option>';		
+   	 	echo '<option value="' . esc_attr($i) . '" ' . selected($i, esc_attr($show_next_seconds), false) . '>' . esc_html($i) . '</option>';		
 	}
 	echo '</select>';
     echo '<p class="description">' . esc_html__('Enter a value between 1 and 120 for the number of seconds.', 'doubles-rotation-tournament') . '</p>';
@@ -394,14 +456,18 @@ function doroto_presentation_options_callback() {
     echo '</table>';
 }
 
-//content of admin data setting page
+
+/**
+ * content of admin data setting page
+ * @since 1.0.0
+ */
 function doroto_data_options_callback() {
     $doroto_settings = get_option('doroto_settings');
 
-    $delete_database = isset($doroto_settings['delete_database']) ? esc_attr($doroto_settings['delete_database']) : '';
-	$delete_pages = isset($doroto_settings['delete_pages']) ? esc_attr($doroto_settings['delete_pages']) : '';
-    $delete_settings = isset($doroto_settings['delete_settings']) ? esc_attr($doroto_settings['delete_settings']) : '';
- 	$update_activation = isset($doroto_settings['update_activation']) ? esc_attr($doroto_settings['update_activation']) : '';
+    $delete_database = isset($doroto_settings['delete_database']) ? intval($doroto_settings['delete_database']) : '';
+	$delete_pages = isset($doroto_settings['delete_pages']) ? intval($doroto_settings['delete_pages']) : '';
+    $delete_settings = isset($doroto_settings['delete_settings']) ? intval($doroto_settings['delete_settings']) : '';
+ 	$update_activation = isset($doroto_settings['update_activation']) ? intval($doroto_settings['update_activation']) : '';
 	
 	echo '<table class="wp-list-table widefat fixed striped table-view-list forms doroto-admin-enlarged-table">';
     // settings 'delete_database'
@@ -409,8 +475,8 @@ function doroto_data_options_callback() {
     echo '<th scope="row"><label for="doroto_settings_delete_database">' . esc_html__('Uninstall the tournament database at the same time as the plugin?', 'doubles-rotation-tournament') . '</label></th>';
     echo '<td>';
     echo '<select name="doroto_settings[delete_database]">';
-   	echo '<option value="1" ' . selected(1, $delete_database, false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
-	echo '<option value="0" ' . selected(0, $delete_database, false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
+   	echo '<option value="1" ' . selected(1, esc_attr($delete_database), false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
+	echo '<option value="0" ' . selected(0, esc_attr($delete_database), false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
     echo '</select>';
     echo '<p class="description">' . esc_html__("If you ever want to return to the plugin, it will be a shame to lose your data.", "doubles-rotation-tournament").'</p>';
     echo '</td>';
@@ -421,8 +487,8 @@ function doroto_data_options_callback() {
     echo '<th scope="row"><label for="doroto_settings_delete_pages">' . esc_html__('Uninstall tournament pages at the same time as the plugin?', 'doubles-rotation-tournament') . '</label></th>';
     echo '<td>';
     echo '<select name="doroto_settings[delete_pages]">';
-   	echo '<option value="1" ' . selected(1, $delete_pages, false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
-	echo '<option value="0" ' . selected(0, $delete_pages, false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
+   	echo '<option value="1" ' . selected(1, esc_attr($delete_pages), false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
+	echo '<option value="0" ' . selected(0, esc_attr($delete_pages), false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
     echo '</select>';
     echo '<p class="description">' . esc_html__("If you have edited page settings, here you have the option to keep these changes even in the event of an update or uninstallation.", "doubles-rotation-tournament") . '</p>';
     echo '</td>';
@@ -433,8 +499,8 @@ function doroto_data_options_callback() {
     echo '<th scope="row"><label for="doroto_settings_delete_settings">' . esc_html__('Uninstall saved settings data at the same time as the plugin?', 'doubles-rotation-tournament') . '</label></th>';
     echo '<td>';
     echo '<select name="doroto_settings[delete_settings]">';
-   	echo '<option value="1" ' . selected(1, $delete_settings, false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
-	echo '<option value="0" ' . selected(0, $delete_settings, false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
+   	echo '<option value="1" ' . selected(1, esc_attr($delete_settings), false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
+	echo '<option value="0" ' . selected(0, esc_attr($delete_settings), false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
 	echo '</select>';
     echo '<p class="description">' . esc_html__("If you ever want to return to the plugin, it will be a shame to lose your data.", "doubles-rotation-tournament") . '</p>';
     echo '</td>';
@@ -445,8 +511,8 @@ function doroto_data_options_callback() {
     echo '<th scope="row"><label for="doroto_settings_update_activation">' . esc_html__('Update pages every time you activate the plugin?', 'doubles-rotation-tournament') . '</label></th>';
     echo '<td>';
     echo '<select name="doroto_settings[update_activation]">';
-   	echo '<option value="1" ' . selected(1, $update_activation, false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
-	echo '<option value="0" ' . selected(0, $update_activation, false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
+   	echo '<option value="1" ' . selected(1, esc_attr($update_activation), false) . '>'. esc_html__("Yes", "doubles-rotation-tournament") .'</option>';
+	echo '<option value="0" ' . selected(0, esc_attr($update_activation), false) . '>'. esc_html__("No", "doubles-rotation-tournament") .'</option>';
     echo '</select>';
     echo '<p class="description">' . esc_html__("This option keeps up with new plugin updates.", "doubles-rotation-tournament") . '</p>';
     echo '</td>';
@@ -455,7 +521,11 @@ function doroto_data_options_callback() {
     echo '</table>';
 }
 
-//menu page callback
+
+/**
+ * menu page callback
+ * @since 1.0.0
+ */
 function doroto_settings_menu_page_callback() {
     ?>
     <div class="wrap">
@@ -478,7 +548,11 @@ function doroto_settings_menu_page_callback() {
 
 add_action('admin_init', 'doroto_register_settings');
 
-//check if 'doroto_settings' exists in wp 'option' table
+
+/**
+ * check if 'doroto_settings' exists in wp 'option' table
+ * @since 1.0.0
+ */
 function doroto_settings_check_existence() {
     $doroto_settings = get_option('doroto_settings');
 
@@ -500,6 +574,8 @@ function doroto_settings_check_existence() {
 		'doroto_display_games' => 1,
 		'doroto_display_player_statistics' => 1,
 		'doroto_table' => 0,
+		'player_name_length' => 20,
+		'youtube_link' => "https://www.youtube.com/watch?v=CdVC63XWr9E", //link with video help
     );
 
     $doroto_settings = wp_parse_args($doroto_settings, $default_values);
@@ -509,10 +585,14 @@ function doroto_settings_check_existence() {
 register_activation_hook(__FILE__, 'doroto_settings_check_existence');
 add_action('admin_init', 'doroto_settings_check_existence');
 
-//check if 'doroto_presentation' exists in wp 'user_meta' table
+
+/**
+ * check if 'doroto_presentation' exists in wp 'user_meta' table
+ * @since 1.0.0
+ */
 function doroto_presentation_check_existence() {
 	global $wpdb;
-	$current_user_id = get_current_user_id();
+	$current_user_id = intval( get_current_user_id() );
 	$doroto_presentation = maybe_unserialize(get_user_meta($current_user_id, 'doroto_presentation', true));	
 	
     // default values

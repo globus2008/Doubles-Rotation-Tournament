@@ -1,7 +1,7 @@
 === Doubles Rotation Tournament ===
 Contributors: globus2008
 Donate link: https://www.paypal.com/donate/?business=S295WXEHMKLF6&no_recurring=0&item_name=Contribution+to+the+development+of+Wordpress+plugin+Doubles+rotation+tournament.&currency_code=EUR
-Tags: tennis, doubles, tournament
+Tags: tennis, doubles, tournament, competition, doroto
 Requires at least: 4.7
 Tested up to: 6.4.2
 Stable tag: 1.0.0
@@ -19,6 +19,8 @@ An alternative form of Doubles tennis tournament, where players enter each match
 The participants of the tournament change partners several times during the tournament by random selection and play against different pairs. The ratio of games won to games lost is calculated for each participant. The winner of the tournament is the player with this highest ratio. Such a player can best adapt to new circumstances and thus becomes an ideal teammate for doubles.
 
 Whether you're a small tennis club or a large sports organization, the Doubles Rotation Tournament plugin offers a comprehensive solution for managing your doubles tennis tournaments efficiently and effectively. Its flexible design allows for customization, catering to the unique requirements of each tournament, while ensuring a smooth and enjoyable experience for all participants.
+
+[youtube https://www.youtube.com/watch?v=CdVC63XWr9E]
 
 = Positives Doubles Rotating Tournament =
 

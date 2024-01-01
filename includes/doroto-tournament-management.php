@@ -1,8 +1,14 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
-//offer new games to play
-function doroto_offer_games($tournament_id) {
+
+/**
+ * offer new games to play
+ * @since 1.0.0
+ */
+function doroto_offer_games($tournament_id,$matches_to_select) {
     global $wpdb;
 	
 	$tournament_id = intval($tournament_id);
@@ -47,7 +53,9 @@ function doroto_offer_games($tournament_id) {
     }
 	
 	$currently_played_count = count($playing)/4;
-	$matches_to_select = doroto_matches_to_select_count($tournament,$currently_played_count);
+	if ( $matches_to_select == 0) {
+		$matches_to_select = doroto_matches_to_select_count($tournament,$currently_played_count);
+	}
 	
     if ($matches_to_select > 0) {
         // Step 1: Filter active players
@@ -75,10 +83,13 @@ function doroto_offer_games($tournament_id) {
         });
 
 		// Step 6: Shuffle the order, but only at the beginning of the tournament
-		$tournament_start=true;
+		$tournament_start = true;
 		foreach ($statistics_temp as $player) {
-			if($player['games'] > 0) $tournament_start = false;
-		}	
+			if($player['games'] > 0) {
+				$tournament_start = false;
+			}
+		}
+		
 		if($tournament_start) {
 			shuffle($statistics_temp); 
 		}
@@ -184,7 +195,9 @@ function doroto_offer_games($tournament_id) {
 		// Step 16: Select another player with the same number of co-matches played
 		$possible_playmates_together = [];
 		foreach ($possible_players_LP1 as $player) {
-			if($player['count'] <= $firstItem_playmate_count) $possible_playmates_together[] = $player['player_id'];
+			if($player['count'] <= $firstItem_playmate_count) {
+				$possible_playmates_together[] = $player['player_id'];
+			}
 		}
 
 		// Step 17: Select other players with the same and fewer matches played and randomly select someone from them
@@ -196,7 +209,9 @@ function doroto_offer_games($tournament_id) {
 		
 		$possible_co_player_array = [];
 		foreach ($statistics_temp as $player) {
-			if($player['games'] <= $firstItem_playmate_player_total_count) $possible_co_player_array[] = $player['player_id'];
+			if($player['games'] <= $firstItem_playmate_player_total_count) {
+				$possible_co_player_array[] = $player['player_id'];
+			}
 		}
 		
 		// Step 18: merge both different fields
@@ -240,8 +255,12 @@ function doroto_offer_games($tournament_id) {
 		//Step 20: the left or right position will be random if the teammate has the same number of positions
 		if ($first_possible_players_L == $first_possible_players_P) {
 			$randomNumber = mt_rand(0, 1) % 2; 
-			if($randomNumber) $first_possible_players_L++;
-			else $first_possible_players_P++;
+			if($randomNumber) {
+				$first_possible_players_L++;
+			}
+			else {
+				$first_possible_players_P++;
+			}
 		}
 	    if ($first_possible_players_L > $first_possible_players_P) {
             $both_possible_players = $possible_players_P1;
@@ -289,15 +308,17 @@ function doroto_offer_games($tournament_id) {
         });
 		
 	    // Step 25: Shuffle the order, but only at the beginning of the tournament
-		$tournament_start=true;
+		$tournament_start = true;
 		foreach ($statistics_temp as $player) {
-			if($player['games'] > 0) $tournament_start = false;
+			if($player['games'] > 0) {
+				$tournament_start = false;
+			}
 		}	
 		if($tournament_start) {
 			shuffle($statistics_temp);
 		}
         // Step 26: Begin Opponent Selection
-        $avoid_players=array_merge($playing, array($player_1, $player_2));
+        $avoid_players = array_merge($playing, array($player_1, $player_2));
      	$possible_opponents_main_player = array_filter($possible_opponents_main_player, function($player) use ($avoid_players) {
             return !in_array($player['player_id'], $avoid_players);
         });
@@ -313,7 +334,9 @@ function doroto_offer_games($tournament_id) {
 		// Step 28: Select other players with the same or 1 more matches played and randomly select someone from them
 		$possible_opponents_array = [];
 		foreach ($statistics_temp as $player) {
-			if($player['games'] <= $choosen_opponent_games) $possible_opponents_array[] = $player['player_id'];
+			if($player['games'] <= $choosen_opponent_games) {
+				$possible_opponents_array[] = $player['player_id'];
+			}
 		}
 		if(!empty($possible_opponents_array)) {
 			foreach ($possible_opponents_main_player as $player) {
@@ -438,7 +461,9 @@ function doroto_offer_games($tournament_id) {
 		// Step 38: Select another player with the same number of co-matches played
 		$possible_playmates_together = [];
 		foreach ($possible_players_LP3 as $player) {
-			if($player['count'] == $firstItem_playmate_count) $possible_playmates_together[] = $player['player_id'];
+			if($player['count'] == $firstItem_playmate_count) {
+				$possible_playmates_together[] = $player['player_id'];
+			}
 		}
 
 		// Step 39: Select another player with the same number of matches played, but filter the selected player from the base set
@@ -454,7 +479,9 @@ function doroto_offer_games($tournament_id) {
 		// Step 41: Select other players with the same number of matches played and randomly select someone from them
 		$possible_co_player_array = [];
 		foreach ($statistics_short as $player) {
-			if($player['games'] == $choosen_player_games) $possible_co_player_array[] = $player['player_id'];
+			if($player['games'] == $choosen_player_games) {
+				$possible_co_player_array[] = $player['player_id'];
+			}
 		}
 		
 		// Step 42: merging the two different fields
@@ -509,9 +536,13 @@ function doroto_offer_games($tournament_id) {
 		
 		//Step 47: the left or right position will be random if the teammate has the same number of positions
 		if ($first_possible_players_L == $first_possible_players_P) {
-			$randomNumber = mt_rand(0, 1) % 2; // Výsledek bude vždy 0 nebo 1
-			if($randomNumber) $first_possible_players_L++;
-			else $first_possible_players_P++;
+			$randomNumber = mt_rand(0, 1) % 2; // The result will always be 0 or 1
+			if($randomNumber) {
+				$first_possible_players_L++;
+			}
+			else {
+				$first_possible_players_P++;
+			}
 		}
 		
 		// Step 48: Designate players for the 'left' and 'right' positions for the other team	
@@ -552,12 +583,16 @@ function doroto_offer_games($tournament_id) {
         // Step 53: Repeat all steps as needed
         $matches_to_select--;
         if ($matches_to_select > 0) {
-            doroto_offer_games($tournament_id); // We recursively call the function for the next matches
+            doroto_offer_games($tournament_id,$matches_to_select); // We recursively call the function for the next matches
         }
     }
 }
 
-//create wp database for DoRoTo
+
+/**
+ * create wp database for DoRoTo
+ * @since 1.0.0
+ */
 function doroto_create_tournaments_table() {
 	global $wpdb;
     ob_start();
@@ -605,7 +640,11 @@ function doroto_create_tournaments_table() {
     }
 }
 
-//create a new tournament
+
+/**
+ * create a new tournament
+ * @since 1.0.0
+ */
 function doroto_insert_tournament() {
 	global $wpdb;
     ob_start();
@@ -615,11 +654,9 @@ function doroto_insert_tournament() {
 	}	
 
 	$current_user = wp_get_current_user();
-	$admin_users[] = $current_user->ID;	
+	$admin_users[] = intval( $current_user->ID );	
 
-	$current_date = date('Y-m-d');
-
-	$name = "DoRoTo " . $current_date;
+	$name = sanitize_text_field( __('DoRoTo', 'doubles-rotation-tournament') . ' ' . date('d-H-i') );
 
 	$last_tournament = $wpdb->get_row($wpdb->prepare(
    		"SELECT * FROM $table_name WHERE admin_users LIKE %s ORDER BY id DESC LIMIT 1",    	
@@ -630,6 +667,8 @@ function doroto_insert_tournament() {
 	$special_group = [];
 	$players = [];
 	$statistics = [];
+	$invitation = wp_kses( __('I invite you to', 'doubles-rotation-tournament').' <b>'. __('Doubles Rotation Tournament!', 'doubles-rotation-tournament').'</b>', $allowed_html );
+	
     if ($last_tournament) {
         $wpdb->insert(
             $table_name,
@@ -652,29 +691,33 @@ function doroto_insert_tournament() {
 				'special_group' => serialize ($special_group),
 				'statistics' => serialize ($statistics),
 				'players' => serialize ($players),
-				'invitation' => esc_html__('I invite you to', 'doubles-rotation-tournament').' <b>'. esc_html__('Doubles Rotation Tournament!', 'doubles-rotation-tournament').'</b>',
+				'invitation' => $invitation,
 				'payment_display' => intval($last_tournament->payment_display)
             )
         );
     } else {
-	$wpdb->insert(
-    	$table_name,
-    	array(
-       	 	'admin_users' => serialize($admin_users), 
-        	'create_date' => date('Y-m-d H:i:s'), 
-			'name' => sanitize_text_field($name), 
-			'special_group' => serialize ($special_group),
-			'players' => serialize ($players),
-			'statistics' => serialize ($statistics),
-			'invitation' => esc_html__('I invite you to', 'doubles-rotation-tournament').' <b>'. esc_html__('Doubles Rotation Tournament!', 'doubles-rotation-tournament').'</b>',
-			'payment_done' => serialize ($payment_done)
+		$wpdb->insert(
+    		$table_name,
+    		array(
+       	 		'admin_users' => serialize($admin_users), 
+        		'create_date' => date('Y-m-d H:i:s'), 
+				'name' => sanitize_text_field($name), 
+				'special_group' => serialize ($special_group),
+				'players' => serialize ($players),
+				'statistics' => serialize ($statistics),
+				'invitation' => $invitation,
+				'payment_done' => serialize ($payment_done)
             )
         );
     }
     return $wpdb->insert_id;
 }
 
-// match number '0' for right array setting
+
+/**
+ * match number '0' for right array setting
+ * @since 1.0.0
+ */
 function doroto_generate_fake_match($players){
 	$matches = array();
 	$players = array_values(unserialize($players));
@@ -693,7 +736,11 @@ function doroto_generate_fake_match($players){
 	return $matches;
 }
 
-//find match by id
+
+/**
+ * find match by id
+ * @since 1.0.0
+ */
 function doroto_get_match_by_id($match_id) {
     global $wpdb;
 
@@ -722,7 +769,11 @@ function doroto_get_match_by_id($match_id) {
     }
 }
 
-//create an array with players statistics
+
+/**
+ * create an array with players statistics
+ * @since 1.0.0
+ */
 function doroto_create_statistics_table ($tournament,$players,$whole_names){
 	global $wpdb;
 	if (empty($players)) {
@@ -737,7 +788,7 @@ function doroto_create_statistics_table ($tournament,$players,$whole_names){
 	if (empty($statistics)) {
 		$statistics = array();	
 	} else	{
-		$statistics=doroto_add_player_statistics_table ($statistics,$tournament,$players);			
+		$statistics = doroto_add_player_statistics_table ($statistics,$tournament,$players);			
 	}
 
 	foreach ($players as $player) {
@@ -753,20 +804,23 @@ function doroto_create_statistics_table ($tournament,$players,$whole_names){
     	}
 
     	if (!$existing_player) {
-		$playmates = array();
+			$playmates = array();
 
 			for ($i = 0; $i < count($players); $i++) {
-    		if($player_id == $players[$i]) continue; 
+    			if($player_id == $players[$i]) {
+					continue; 
+				}
 				$onerow=array(
 					'player_id' => $players[$i],
 					'count' => 0,
 				);
 				$playmates[] = $onerow;
-		}	
-        $player_info = array(
+			}
+			
+       		 $player_info = array(
             	'player_id' => $player_id,
 				'active' => '1',
-            	'display_name' => intval($whole_names) ? esc_html($user->display_name) : esc_html(doroto_display_short_name($user->display_name)),
+            	'display_name' => $whole_names ? sanitize_text_field( $user->display_name ) : sanitize_text_field( doroto_display_short_name( $user->display_name ) ),
 			 	'games' => 0, // Number of matches
             	'won' => 0, // Number of games won
             	'lost' => 0, // Number of games lost
@@ -775,9 +829,9 @@ function doroto_create_statistics_table ($tournament,$players,$whole_names){
             	'playmates_L' => $playmates, // An empty field for players he played with in the position on the right
 			 	'playmates_P' => $playmates, // An empty field for players with whom he played in the position on the left
             	'opponents' => $playmates, // An empty field for players he played against
-       	 );
+       	 	);
 
-       	 $statistics[] = $player_info;
+       	 	$statistics[] = $player_info;
     	}
 	}
 	
@@ -787,7 +841,11 @@ function doroto_create_statistics_table ($tournament,$players,$whole_names){
 	return $statistics;
 }
 
-//definition of global variable at the beginning
+
+/**
+ * definition of global variable at the beginning
+ * @since 1.0.0
+ */
 function doroto_define_permanent_tournament_id() {
 	global $doroto_pernament_tournament_id; 
 	$doroto_pernament_tournament_id = 0; 
@@ -795,18 +853,22 @@ function doroto_define_permanent_tournament_id() {
 
 add_action('wp_loaded', 'doroto_define_permanent_tournament_id');
 
-// create a new tournament after submitting form
+
+/**
+ * create a new tournament after submitting form
+ * @since 1.0.0
+ */
 function doroto_add_tournament_result() {
     global $wpdb;
 	$tournament_id = doroto_getTournamentId();
 	if ($tournament_id <= 0){
-		$output = esc_html__('Invalid value entered.','doubles-rotation-tournament' );
+		$output = sanitize_text_field(__('Invalid value entered.','doubles-rotation-tournament' ) );
 		doroto_info_messsages_save ($output);	
 		return;
 	};
 	
 	if (!is_user_logged_in()) { 
-		$output = esc_html__('You must log in to add a tournament!','doubles-rotation-tournament');
+		$output = sanitize_text_field(__('You must log in to add a tournament!','doubles-rotation-tournament') );
 		doroto_info_messsages_save ($output);		
     	doroto_redirect_modify_url($tournament_id,"");
 		exit;
@@ -815,21 +877,21 @@ function doroto_add_tournament_result() {
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (isset($_POST['action']) && $_POST['action'] == 'doroto_add_tournament_save') {
 			
-			if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'doroto_add_tournament_nonce')) {
+			if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ( $_POST['_wpnonce'] ) ) , 'doroto_add_tournament_nonce' ) ) {
         		wp_die( esc_html__('Invalid request.','doubles-rotation-tournament' ) );
     		}
 			
 			if(doroto_read_settings('only_admin_creates', 0) == 1) {
 				$current_user = wp_get_current_user();
 				if (!in_array('administrator', (array) $current_user->roles) && !in_array('editor', (array) $current_user->roles) && !in_array('author', (array) $current_user->roles) ) {
-					$output = esc_html__('You do not have site administrator privileges to create a new tournament.','doubles-rotation-tournament');
+					$output = sanitize_text_field(__('You do not have site administrator privileges to create a new tournament.','doubles-rotation-tournament') );
 					doroto_info_messsages_save ($output);	
 					doroto_redirect_modify_url(0,"");	
 					exit;
 				}
 			}
             $tournament_id = doroto_insert_tournament();
-			$output = esc_html__('A new tournament has just been created.','doubles-rotation-tournament');
+			$output = sanitize_text_field(__('A new tournament has just been created.','doubles-rotation-tournament') );
 			doroto_info_messsages_save ($output);	
 			doroto_redirect_modify_url($tournament_id,"");
 			exit;
@@ -850,7 +912,11 @@ function doroto_add_tournament_result() {
 add_action('admin_post_doroto_add_tournament_save', 'doroto_add_tournament_result');
 add_action('admin_post_nopriv_doroto_add_tournament_save', 'doroto_add_tournament_result');
 
-// select 4 finalists 
+ 
+/**
+ * select 4 finalists
+ * @since 1.0.0
+ */
 function doroto_select_final_doubles($player_results, $tournament, $current_user) {
     $output = ''; 
     $current_user_id = intval($current_user->ID);
@@ -897,7 +963,7 @@ function doroto_select_final_doubles($player_results, $tournament, $current_user
         }
         $output .= '</select></td>';
         $output .= '</tr></table></div>';
-		$output .= '<input type="hidden" name="tournament_id" value="' . esc_attr($tournament_id) . '">';
+		$output .= '<input type="hidden" name="tournament_id" value="' . esc_attr( $tournament_id ) . '">';
         $output .= '<input type="submit" name="final_doubles" value="' . esc_html__("Save the composition of the final group", "doubles-rotation-tournament") . '">';
         $output .= '</form></p>';        
     } else {
@@ -907,7 +973,10 @@ function doroto_select_final_doubles($player_results, $tournament, $current_user
 }
 
 
-//save 4 finalists 
+/**
+ * save 4 finalists
+ * @since 1.0.0
+ */ 
 function doroto_save_final_doubles() {
     global $wpdb;
 	global $doroto_output_form;
@@ -947,80 +1016,121 @@ function doroto_save_final_doubles() {
 
 add_action('init', 'doroto_save_final_doubles'); //template_redirect
 
-//result final match
+
+/**
+ * result final match
+ * @since 1.0.0
+ */ 
 function doroto_result_final_doubles($player_results, $tournament, $current_user) {
     $output = ''; 
-    $current_user_id = $current_user->ID;
+    $current_user_id = intval( $current_user->ID );
 
     $admin_users = unserialize($tournament->admin_users);
 	$double_players = unserialize($tournament->final_four);
-	$whole_names = intval($tournament->whole_names);
+	$whole_names = intval($tournament->whole_names);	
 	
-	
-	$current_user_id = get_current_user_id();
 	$players = unserialize($tournament->final_four);
 	$tournament_id = intval($tournament->id);
 	$final_result = unserialize($tournament->final_result);
 	$allow_input_results = intval($tournament->allow_input_results);
 	
-        $output .= '<p>';
-        $output .= "<div class='doroto-table-responsive'>";
-        $output .= "<table>";
-        $output .= "<tr class = 'doroto-left-aligned'><th>" . esc_html__("L1", "doubles-rotation-tournament") . "</th><th>" . esc_html__("R1", "doubles-rotation-tournament") . "</th><th>" . esc_html__("L2", "doubles-rotation-tournament") . "</th><th>" . esc_html__("R2", "doubles-rotation-tournament") . "</th><th>" . esc_html__("Result", "doubles-rotation-tournament") . "</th>";
-		if(empty($final_result)) $output .= "<th>" . esc_html__("Save", "doubles-rotation-tournament") . "</th>";
-		$output .= "</tr>";
+	$special_group = maybe_unserialize($tournament->special_group);
+	if (!is_array($special_group)) {
+		$special_group = [];
+	}
 	
-        $output .= "<tr>";
-        $output .= "<td>";
-        $output .= esc_html(doroto_find_player_name ($double_players['l1'],$whole_names));
-        $output .= '</td>';
-		$output .= "<td>";
-        $output .= esc_html(doroto_find_player_name ($double_players['p1'],$whole_names));
-        $output .= '</td>';
-		$output .= "<td>";
-        $output .= esc_html(doroto_find_player_name ($double_players['l2'],$whole_names));
-        $output .= '</td>';
-		$output .= "<td>";
-        $output .= esc_html(doroto_find_player_name ($double_players['p2'],$whole_names));
-        $output .= '</td>';
+    $output .= '<p>';       
+	$output .= "<div class='doroto-table-responsive'>";        
+	$output .= "<table>";
+	$output .= "<tr class = 'doroto-left-aligned'><th>" . esc_html__("L1", "doubles-rotation-tournament") . "</th><th>" . esc_html__("R1", "doubles-rotation-tournament") . "</th><th>" . esc_html__("L2", "doubles-rotation-tournament") . "</th><th>" . esc_html__("R2", "doubles-rotation-tournament") . "</th><th>" . esc_html__("Result", "doubles-rotation-tournament") . "</th>";
 		
-
-		if((in_array($current_user_id, $players) && $allow_input_results)|| (doroto_is_admin ($tournament_id) > 0)) {
-			$output .= '<td>';
-			if(empty($final_result)) {
-
-				if (isset($_SERVER['REQUEST_URI'])) $uri = sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI']));
-				else $uri = '';
+	if(empty($final_result)) {
+		$output .= "<th>" . esc_html__("Save", "doubles-rotation-tournament") . "</th>";
+	}		
+	$output .= "</tr>";        
+	$output .= "<tr>";	
 		
-				$uri = '/' . ltrim($uri, '/');
-				
-				$output .= '<form method="post" action="'.esc_url($uri).'">';
-           	 	// Adding the form for results
-				$output .= '<input type="hidden" name="tournament_id" value="' . esc_attr($tournament_id) . '">';
-    			$output .= '<select name="final_result">';
-				$output .= doroto_possible_results ($tournament);
-				$output .= '</td><td>';
-				$output .= '<input type="submit" name="submit_final_result" value="'. esc_html__('Save','doubles-rotation-tournament').'">';
-            	$output .= '</form>';				
+	if ( in_array($double_players['l1'], $special_group) ) {
+		$output .= '<td class="doroto-special-group-text">';
+	}
+    else {
+		$output .= "<td>";
+	}
+	
+    $output .= esc_html(doroto_find_player_name ($double_players['l1'],$whole_names));        
+	$output .= '</td>';	
+		
+	if ( in_array($double_players['p1'], $special_group) ) {
+		$output .= '<td class="doroto-special-group-text">'; 
+	} else {
+		$output .= "<td>";
+	}
+	
+	$output .= esc_html(doroto_find_player_name ($double_players['p1'],$whole_names));        
+	$output .= '</td>';	
+		
+	if ( in_array($double_players['l2'], $special_group) ) {
+		$output .= '<td class="doroto-special-group-text">';
+	} else {
+		$output .= "<td>";
+	}
+	
+	$output .= esc_html(doroto_find_player_name ($double_players['l2'],$whole_names));        
+	$output .= '</td>';	
+		
+	if ( in_array($double_players['p2'], $special_group) ) {
+		$output .= '<td class="doroto-special-group-text">';
+	} else {
+		$output .= "<td>";
+	}
+        
+	$output .= esc_html(doroto_find_player_name ($double_players['p2'],$whole_names));        
+	$output .= '</td>';	
+		
+	if((in_array($current_user_id, $players) && $allow_input_results)|| (doroto_is_admin ($tournament_id) > 0)) {
+		
+		$output .= '<td>';
+		if(empty($final_result)) {
+			if (isset($_SERVER['REQUEST_URI'])) {
+				$uri = sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI']));
 			} else {
-				$output .= esc_html($final_result['result_1'].' : '.$final_result['result_2']);
+				$uri = '';
 			}
-			$output .= '</td>';
-			$output .= '</tr></table></div>';
-        	$output .= '</p>';
-    	} else {
-			if(!empty($final_result)) {
-				$output .= '<td>';
+		
+			$uri = '/' . ltrim($uri, '/');		
+			
+			 // Adding the form for results
+			$output .= '<form method="post" action="'.esc_url($uri).'">';
+			$output .= '<input type="hidden" name="tournament_id" value="' . esc_attr($tournament_id) . '">';
+    		$output .= '<select name="final_result">';
+			$output .= doroto_possible_results ($tournament);
+			$output .= '</td><td>';
+			$output .= '<input type="submit" name="submit_final_result" value="'. esc_html__('Save','doubles-rotation-tournament').'">';
+            $output .= '</form>';				
+		} else {
 				$output .= esc_html($final_result['result_1'].' : '.$final_result['result_2']);
-				$output .= '</td>';
-			}	
-			$output .= '</tr></table></div>';
-        	$output .= '</p>';
-		}			
+		}
+		
+		$output .= '</td>';
+		$output .= '</tr></table></div>';
+        $output .= '</p>';
+    } else {
+		if(!empty($final_result)) {
+			$output .= '<td>';
+			$output .= esc_html( $final_result['result_1'].' : '.$final_result['result_2'] );
+			$output .= '</td>';
+		}	
+		$output .= '</tr></table></div>';
+        $output .= '</p>';
+	}			
     return $output; 
 }
 
-//update final match result
+
+/**
+ * update final match result
+ * @since 1.0.0
+ */ 
 function doroto_update_final_match_result() {
     global $wpdb;
 	global $doroto_output_form;
@@ -1036,7 +1146,11 @@ function doroto_update_final_match_result() {
 }
 add_action('init', 'doroto_update_final_match_result');
 
-//save final match result 
+
+/**
+ * save final match result 
+ * @since 1.0.0
+ */ 
 function doroto_save_final_result($tournament_id,$final_result){
 		global $wpdb;
 		global $doroto_output_form;
@@ -1050,7 +1164,7 @@ function doroto_save_final_result($tournament_id,$final_result){
 		$result_2 = intval($result_2);
 		$result_2 = is_numeric($result_2) ? $result_2 : 0;
 		if(($result_1 < 0) || ($result_2 < 0) || (($result_1 == 0) && ($result_2 == 0))){
-			$doroto_output_form = esc_html__('Invalid value entered.','doubles-rotation-tournament' );
+			$doroto_output_form = sanitize_text_field(__('Invalid value entered.','doubles-rotation-tournament' ) );
         	return 0;
 		}
 
@@ -1067,7 +1181,11 @@ function doroto_save_final_result($tournament_id,$final_result){
 		}
 }
 
-//update selected 4 finalists
+
+/**
+ * update selected 4 finalists
+ * @since 1.0.0
+ */
 function doroto_update_final_four($tournament, $l1, $p1, $l2, $p2) {
     global $wpdb;
 
@@ -1089,7 +1207,11 @@ function doroto_update_final_four($tournament, $l1, $p1, $l2, $p2) {
                 );
 }
 
-//display all possible results
+
+/**
+ * display all possible results
+ * @since 1.0.0
+ */
 function doroto_possible_results ($tournament) {
 	$max_games = intval($tournament->max_games);
 	$change_results = intval($tournament->change_results);
@@ -1105,11 +1227,21 @@ function doroto_possible_results ($tournament) {
 	} 	
 	//The game can only be ended with a lead of 2 games
 	elseif ($change_results == 2) {
-		if($max_games == 3) $options = array('0:3','1:3','2:3','3:0','3:1','3:2');
-		if($max_games == 5) $options = array('0:5','1:4','2:4','3:4','4:1','4:2','4:3','5:0');
-		if($max_games == 7) $options = array('0:7','1:6','2:5','3:5','4:5','5:2','5:3','5:4','6:1','7:0');
-		if($max_games == 9) $options = array('0:9','1:8','2:7','3:6','4:6','5:6','6:5','6:4','6:3','7:2','8:1','9:0');
-		if($max_games == 11) $options = array('0:11','1:10','2:9','3:8','4:7','5:7','6:7','7:4','7:5','7:6','8:3','9:2','10:1','11:0');		
+		if($max_games == 3) {
+			$options = array('0:3','1:3','2:3','3:0','3:1','3:2');
+		}
+		if($max_games == 5) {
+			$options = array('0:5','1:4','2:4','3:4','4:1','4:2','4:3','5:0');
+		}
+		if($max_games == 7) {
+			$options = array('0:7','1:6','2:5','3:5','4:5','5:2','5:3','5:4','6:1','7:0');
+		}
+		if($max_games == 9) {
+			$options = array('0:9','1:8','2:7','3:6','4:6','5:6','6:5','6:4','6:3','7:2','8:1','9:0');
+		}
+		if($max_games == 11) {
+			$options = array('0:11','1:10','2:9','3:8','4:7','5:7','6:7','7:4','7:5','7:6','8:3','9:2','10:1','11:0');	
+		}
 		foreach ($options as $option) {
     		$output .= "<option value='" . esc_attr($option) . "'>" . esc_html($option) . "</option>";
 		}
@@ -1117,11 +1249,21 @@ function doroto_possible_results ($tournament) {
 	} 
 	//The game can be ended with a lead of 2 games and prematurely
 	elseif ($change_results == 3) {
-		if($max_games == 3) $options = array('0:3','1:3','2:3','3:0','3:1','3:2');
-		if($max_games == 5) $options = array('0:4','0:5','1:4','2:4','3:4','4:0','4:1','4:2','4:3','5:0');
-		if($max_games == 7) $options = array('0:5','0:6','0:7','1:5','1:6','2:5','3:5','4:5','5:0','5:1','5:2','5:3','5:4','6:0','6:1','7:0');
-		if($max_games == 9) $options = array('0:6','0:7','0:8','0:9','1:6','1:7','1:8','2:6','2:7','3:6','4:6','5:6','6:0','6:1','6:2','6:3','6:4','6:5','7:0','7:1','7:2','8:0','8:1','9:0');
-		if($max_games == 11) $options = array('0:7','0:8','0:9','0:10','0:11','1:7','1:8','1:9','1:10','2:7','2:8','2:9','3:7','3:8','4:7','5:7','6:7', '7:0','7:1','7:2','7:3','7:4','7:5','7:6','8:0','8:1','8:2','8:3','9:1','9:2','10:0','10:1','11:0');	
+		if($max_games == 3) {
+			$options = array('0:3','1:3','2:3','3:0','3:1','3:2');
+		}
+		if($max_games == 5) {
+			$options = array('0:4','0:5','1:4','2:4','3:4','4:0','4:1','4:2','4:3','5:0');
+		}
+		if($max_games == 7) {
+			$options = array('0:5','0:6','0:7','1:5','1:6','2:5','3:5','4:5','5:0','5:1','5:2','5:3','5:4','6:0','6:1','7:0');
+		}
+		if($max_games == 9) {
+			$options = array('0:6','0:7','0:8','0:9','1:6','1:7','1:8','2:6','2:7','3:6','4:6','5:6','6:0','6:1','6:2','6:3','6:4','6:5','7:0','7:1','7:2','8:0','8:1','9:0');
+		}
+		if($max_games == 11) {
+			$options = array('0:7','0:8','0:9','0:10','0:11','1:7','1:8','1:9','1:10','2:7','2:8','2:9','3:7','3:8','4:7','5:7','6:7', '7:0','7:1','7:2', '7:3', '7:4','7:5','7:6', '8:0','8:1','8:2', '8:3', '9:1', '9:2','10:0','10:1', '11:0');	
+		}
 		foreach ($options as $option) {
     		$output .= "<option value='" . esc_attr($option) . "'>" . esc_html($option) . "</option>";
 		}
@@ -1146,7 +1288,7 @@ function doroto_possible_results ($tournament) {
 		}
   
 		//Basic settings according to the parameter Maximum number of games in a match
-	    $output .= "<option value='" . esc_attr("{$i}:" . ($max_games - $i)) . "'>" . esc_html("{$i}:" . ($max_games - $i)) . "</option>";
+	    $output .= "<option value='" . esc_attr( "{$i}:" . ($max_games - $i) ) . "'>" . esc_html( "{$i}:" . ($max_games - $i) ) . "</option>";
 
       }
 	}
@@ -1154,7 +1296,10 @@ function doroto_possible_results ($tournament) {
 }
 
 
-//update mach result after submitting form
+/**
+ * update mach result after submitting form
+ * @since 1.0.0
+ */
 function doroto_update_match_result() {
     global $wpdb;
 	global $doroto_output_form;
@@ -1163,7 +1308,7 @@ function doroto_update_match_result() {
 	
     if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['result']) && isset($_POST['match_number']) && isset($_POST['hide_' . $match_number_post])) {
 		
-		if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'doroto_games_to_play_nonce')) {	
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ( $_POST['_wpnonce'] ) ) , 'doroto_games_to_play_nonce' ) ) {
         	wp_die( esc_html__('Invalid request.','doubles-rotation-tournament' ) );
     	}
 		
@@ -1254,7 +1399,11 @@ function doroto_update_match_result() {
     }
 }
 
-//when a match is finished then update statistics array
+
+/**
+ * when a match is finished then update statistics array
+ * @since 1.0.0
+ */
 function doroto_update_statistics_by_result($tournament_id, $tournament, $match, $correct) {
 	global $wpdb;
     $statistics = unserialize($tournament->statistics);
@@ -1265,7 +1414,9 @@ function doroto_update_statistics_by_result($tournament_id, $tournament, $match,
     foreach ($statistics as &$playerData) {
         if (in_array($playerData['player_id'], $playersInMatch)) {
             // a) Increase games by +1
-            if(!$correct) $playerData['games']++; //does not increase in case of correction of the result
+            if(!$correct) {
+				$playerData['games']++; //does not increase in case of correction of the result
+			}
 
             // Index for players in the match
             // the index can only be equal to 0,1,2 or 3 depending on the position in the array
@@ -1282,7 +1433,7 @@ function doroto_update_statistics_by_result($tournament_id, $tournament, $match,
                 }
 
                 // d) Update ratio
-                if($playerData['lost'] !=0) {
+                if($playerData['lost'] != 0) {
 					$playerData['ratio'] = $playerData['won'] / $playerData['lost'];
 				} else {
 					$playerData['ratio'] = $playerData['won'];
@@ -1355,9 +1506,9 @@ function doroto_update_statistics_by_result($tournament_id, $tournament, $match,
 	// Removing players from the $playersInMatch array
 	if(!$correct) {
 			foreach ($playersInMatch as $playerToRemove) {
-   				 $key = array_search($playerToRemove, $playing);
+   				$key = array_search($playerToRemove, $playing);
    	 			if ($key !== false) {
-       	 		unset($playing[$key]);
+       	 			unset($playing[$key]);
     			}
 			}	
 			// Reindexing an array after removing elements
@@ -1374,13 +1525,20 @@ function doroto_update_statistics_by_result($tournament_id, $tournament, $match,
 	);
 }
 
-//check if there is a need to find a new match
+
+/**
+ * check if there is a need to find a new match
+ * @since 1.0.0
+ */
 function doroto_allow_to_find_new_match ($tournament,$selected_matches,$currently_played_array) {
 	$players_count = count(unserialize($tournament->players));
 	$min_not_playing = intval($tournament->min_not_playing);
 	$currently_played_count=count($currently_played_array);
 	$selected_games_count=count($selected_matches);
-	if($min_not_playing == 0) $min_not_playing = $players_count; 
+	
+	if($min_not_playing == 0) {
+		$min_not_playing = $players_count; 
+	}
 	
 	if ($currently_played_count == 0) {
 		return true;
@@ -1391,13 +1549,18 @@ function doroto_allow_to_find_new_match ($tournament,$selected_matches,$currentl
 	}
 }
 
-//reduction of the number of matches offered according to the number of courts and according to the number of players
+
+/**
+ * reduction of the number of matches offered according to the number of courts and according to the number of players
+ * @since 1.0.0
+ */
 function doroto_matches_to_select_count($tournament,$currently_played_count){ 
 	global $wpdb;
     $courts_available = intval($tournament->courts_available);
 	$min_not_playing = intval($tournament->min_not_playing);
 	$players_count = count(unserialize($tournament->players));
-	$max_based_on_players=floor($players_count / 4);
+	$max_based_on_players = floor($players_count / 4);
+	
 	if ($courts_available <= $max_based_on_players) {
 		$maximum_number_games = $courts_available;
 	} else {
@@ -1405,7 +1568,9 @@ function doroto_matches_to_select_count($tournament,$currently_played_count){
 	}
 	$matches_to_select = $maximum_number_games - $currently_played_count; 
 	
-	if($min_not_playing == 0) $min_not_playing = $players_count; 
+	if($min_not_playing == 0) {
+		$min_not_playing = $players_count; 
+	}
 	if ($currently_played_count == 0) {
 		return $matches_to_select;
 	} elseif ($players_count - ($currently_played_count*4) >= $min_not_playing) {
@@ -1413,19 +1578,22 @@ function doroto_matches_to_select_count($tournament,$currently_played_count){
 	} else {
 		return 0;
 	}
-	
 	return $matches_to_select;
 }
 
-//close or reopen a tournament
+
+/**
+ * close or reopen a tournament
+ * @since 1.0.0
+ */
 function doroto_toggle_tournament() {
     global $wpdb;
-    global $current_user;
-    wp_get_current_user();
+
+	$current_user = wp_get_current_user();
 	$output ='';
 
     if (!isset($_REQUEST['tournament_id'])) {
-        $output = esc_html__("Tournament ID was not provided.", "doubles-rotation-tournament");
+        $output = sanitize_text_field(__("Tournament ID was not provided.", "doubles-rotation-tournament") );
 		doroto_info_messsages_save ($output);
     	doroto_redirect_modify_url(0,"");
 		exit;
@@ -1436,7 +1604,7 @@ function doroto_toggle_tournament() {
 	$tournament = doroto_prepare_tournament ($tournament_id);
 
 	if ($tournament == null) {
-		$output = esc_html__('The tournament was not found.','doubles-rotation-tournament' );
+		$output = sanitize_text_field(__('The tournament was not found.','doubles-rotation-tournament' ) );
 		doroto_info_messsages_save ($output);
     	doroto_redirect_modify_url(0,"");
 		exit;
@@ -1444,7 +1612,7 @@ function doroto_toggle_tournament() {
 
 	$open_registration = intval($tournament->open_registration); 
 	if($open_registration) {
-		$output = esc_html__("A tournament cannot be closed while player registration is open.", "doubles-rotation-tournament");
+		$output = sanitize_text_field(__("A tournament cannot be closed while player registration is open.", "doubles-rotation-tournament") );
 	}
 
 	if (doroto_is_admin ($tournament_id) > 0) {
@@ -1479,7 +1647,11 @@ function doroto_toggle_tournament() {
 
 add_action('wp_ajax_doroto_toggle_tournament', 'doroto_toggle_tournament');
 
-//close or reopen a registration
+
+/**
+ * close or reopen a registration
+ * @since 1.0.0
+ */
 function doroto_toggle_registration() {
     global $wpdb;
 	$table_name = $wpdb->prefix . 'doroto_tournaments';
@@ -1491,21 +1663,21 @@ function doroto_toggle_registration() {
         if ($tournament->open_registration == '1') {
 			$players_count = count(unserialize($tournament->players));
             if ($players_count < 4) {
-                $output .= esc_html__("Tournament no.", "doubles-rotation-tournament").' ' . esc_html($tournament_id).' ' . esc_html__("does not have sufficient occupancy to close registration.", "doubles-rotation-tournament");
+                $output .= sanitize_text_field(__("Tournament no.", "doubles-rotation-tournament").' ' . $tournament_id.' ' . __("does not have sufficient occupancy to close registration.", "doubles-rotation-tournament") );
             } else {
 				if ($players_count <= 8) { 
 					$min_not_playing = 0;
 				} else {
-					$min_not_playing = $tournament->min_not_playing;
+					$min_not_playing = intval( $tournament->min_not_playing );
 				}
-                $output .= esc_html__("Registration of tournament players no.", "doubles-rotation-tournament").' ' . esc_html($tournament_id) .' '. esc_html__("was closed.", "doubles-rotation-tournament");
+                $output .= sanitize_text_field(__("Registration of tournament players no.", "doubles-rotation-tournament").' ' . $tournament_id .' '. __("was closed.", "doubles-rotation-tournament") );
 				
 				$matches_list = unserialize($tournament->matches_list);
 				if(empty($matches_list)) {
 					$matches_list = doroto_generate_fake_match($tournament->players);
 				}
 				
-				$statistics = doroto_create_statistics_table ($tournament,unserialize($tournament->players),$tournament->whole_names);
+				$statistics = doroto_create_statistics_table ($tournament,unserialize($tournament->players),intval($tournament->whole_names) );
 
 				$wpdb->update(
    						$table_name, 
@@ -1522,10 +1694,10 @@ function doroto_toggle_registration() {
             }
         } else {
             $wpdb->update($table_name, array('open_registration' => 1), array('id' => $tournament_id));
-            $outpute .= esc_html__("Tournament no.", "doubles-rotation-tournament").' ' . esc_html($tournament_id).' '. esc_html__("was open for registration.", "doubles-rotation-tournament");
+            $output .= sanitize_text_field(__("Tournament no.", "doubles-rotation-tournament").' ' . $tournament_id.' '. __("was open for registration.", "doubles-rotation-tournament") );
         }
     } else {
-        $output .= esc_html__("The tournament was not found.", "doubles-rotation-tournament");
+        $output .= sanitize_text_field(__("The tournament was not found.", "doubles-rotation-tournament") );
 		
     }
 
@@ -1534,12 +1706,16 @@ function doroto_toggle_registration() {
 	exit;
 }
 
-//save the first new tournament into wp database as an example
+
+/**
+ * save the first new tournament into wp database as an example
+ * @since 1.0.0
+ */
 function doroto_create_tournament_record() {
 	ob_start();
     global $wpdb;
 
-    $current_user_id = get_current_user_id();
+    $current_user_id = intval( get_current_user_id() );
 
     // Checking if a record with ID 1 exists in table 'doroto_tournaments'
     $tournament = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}doroto_tournaments WHERE id = 1");
@@ -1549,16 +1725,16 @@ function doroto_create_tournament_record() {
 		$special_group[] = $current_user_id;
 		$admin_users[] = $current_user_id;
 		
-	$users = $wpdb->get_results($wpdb->prepare(
+		$users = $wpdb->get_results($wpdb->prepare(
     	"SELECT ID FROM {$wpdb->prefix}users WHERE ID != %d LIMIT 8",
     	$current_user_id
-	));
+		));
 
-    foreach ($users as $user) {
-        if ($user->ID != 1) {
-			$players[] = $user->ID;
-		}
-    }
+    	foreach ($users as $user) {
+        	if ($user->ID != 1) {
+				$players[] = intval( $user->ID );
+			}
+    	}
 		$current_date = date("Y-m-d H:i:s");
 		if (count($players) >= 4) {
 			$matches_list = doroto_generate_fake_match(serialize($players));
@@ -1572,7 +1748,7 @@ function doroto_create_tournament_record() {
             "{$wpdb->prefix}doroto_tournaments",
             [
                 'id' => 1,
-				'name' => esc_html__("My first Doubles Rotation Tournament", "doubles-rotation-tournament"),
+				'name' => sanitize_text_field(__("My first Doubles Rotation Tournament", "doubles-rotation-tournament") ),
                 'admin_users' => serialize($admin_users),
          	    'players' => serialize($players),
 				'special_group' => serialize($special_group),
@@ -1585,7 +1761,7 @@ function doroto_create_tournament_record() {
 				'courts_available' => 1,
 				'matches_list' => serialize($matches_list),
 				'create_date' => $current_date,
- 				'invitation' => esc_html__("I invite you to participate in testing the principle of operation of the Doubles Rotation Tournament. This is only a virtual tournament without actual play on the tennis court.", "doubles-rotation-tournament")
+ 				'invitation' => sanitize_text_field(__("I invite you to participate in testing the principle of operation of the Doubles Rotation Tournament. This is only a virtual tournament without actual play on the tennis court.", "doubles-rotation-tournament") )
             ]
         );
 		$tournament_id = 1;
@@ -1602,7 +1778,11 @@ function doroto_create_tournament_record() {
 	ob_get_clean();
 }
 
-//choose a tournament for displaying on the screen
+
+/**
+ * choose a tournament for displaying on the screen
+ * @since 1.0.0
+ */
 function doroto_choose_tournament($tournament_id) {
     global $wpdb;
 	$output = '';
@@ -1610,13 +1790,13 @@ function doroto_choose_tournament($tournament_id) {
     if (isset($_GET['tournament_id'])) {
         $tournament_id = intval($_GET['tournament_id']);
     } else {
-        $output = esc_html__("Tournament ID was not provided.", "doubles-rotation-tournament");
+        $output = sanitize_text_field(__("Tournament ID was not provided.", "doubles-rotation-tournament") );
 		doroto_info_messsages_save ($output);
     	doroto_redirect_modify_url($tournament_id,"");
 		exit;
     }
 
-	$output = esc_html__("The data is being displayed for the tournament no.", "doubles-rotation-tournament").' ' . esc_html($tournament_id).'.';
+	$output = sanitize_text_field(__("The data is being displayed for the tournament no.", "doubles-rotation-tournament").' ' . $tournament_id . '.' );
 	doroto_info_messsages_save ($output);
     doroto_redirect_modify_url($tournament_id,"");
 	exit;
@@ -1625,16 +1805,44 @@ function doroto_choose_tournament($tournament_id) {
 add_action('wp_ajax_doroto_choose_tournament', 'doroto_choose_tournament');
 add_action('wp_ajax_nopriv_doroto_choose_tournament', 'doroto_choose_tournament'); // This is for non-logged in users
 
-//list of filtered tournaments
-function doroto_prepare_filtered_tournaments($display_rows) {
-    global $wpdb;
 
-    $filter_option = get_user_meta(get_current_user_id(), 'doroto_filter_tournaments', true);
-    $filter_option = $filter_option ? intval($filter_option) : 0;
+/**
+ * get filter option from user_meta
+ * @since 1.0.0
+ */
+function doroto_read_filter_tournament () {
+	global $wpdb;
+	$filter_option_first = array(
+                    'selection' => 0,
+                    'first_id' => 0,
+                    'last_id' => 0
+                );
+	$filter_option_serialized = get_user_meta(get_current_user_id(), 'doroto_filter_tournaments', true);
+	if (!empty($filter_option_serialized)) {
+        $filter_option = maybe_unserialize($filter_option_serialized);
+		if(!is_array($filter_option))  {
+			$filter_option = $filter_option_first;
+		}
+    } else {
+        $filter_option = $filter_option_first;
+    }
+	return $filter_option;
+}
+
+
+/**
+ * list of filtered tournaments
+ * @since 1.0.0
+ */
+function doroto_prepare_filtered_tournaments() {
+    global $wpdb;
+	
+	$filter = doroto_read_filter_tournament();
+    $filter_option = intval($filter['selection']);
 
     $sql_query = "SELECT * FROM {$wpdb->prefix}doroto_tournaments";
 
-    $current_user_id = get_current_user_id();
+    $current_user_id = intval( get_current_user_id() );
     $tournaments = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}doroto_tournaments");
     $filtered_tournaments = array();
 
@@ -1701,8 +1909,6 @@ function doroto_prepare_filtered_tournaments($display_rows) {
     if ($filter_option < 4 || $filter_option > 7) {
         $results = $wpdb->get_results($sql_query);
 		
-        // Crop to maximum number of records
-        $results = array_slice($results, 0, $display_rows);
         return $results;
     }
 
@@ -1711,16 +1917,17 @@ function doroto_prepare_filtered_tournaments($display_rows) {
         return $b->id - $a->id;
     });
 
-    // Crop to maximum number of records
-    $filtered_tournaments = array_slice($filtered_tournaments, 0, $display_rows);
-
     return $filtered_tournaments;
 }
 
-//function that change what is presented during a tournament
+
+/**
+ * function that changes what is presented during a tournament
+ * @since 1.0.0
+ */
 function doroto_change_presentation(){
 	global $wpdb;
-	$current_user_id = get_current_user_id();
+	$current_user_id = intval( get_current_user_id() );
 	$doroto_presentation = maybe_unserialize(get_user_meta($current_user_id, 'doroto_presentation', true));	
 	$shortcodes = array('doroto_tournament_log_link','doroto_games_to_play','doroto_display_players','doroto_display_games','doroto_display_player_statistics','doroto_table');
 	
@@ -1731,16 +1938,26 @@ function doroto_change_presentation(){
     	);
 		update_user_meta($current_user_id, 'doroto_presentation', serialize($doroto_presentation));
 	} 
+	
 	$allow_to_run = intval($doroto_presentation['allow_to_run']);
-	if($allow_to_run != 1) return null;
+	if($allow_to_run != 1) {
+		return null;
+	}
 	
 	$doroto_settings = get_option('doroto_settings');
-	if(!isset($doroto_settings)) return null;
+	if(!isset($doroto_settings)) {
+		return null;
+	}
+	
 	$shortcodes_validated=[];
 	foreach($shortcodes as $code) {
-		if($doroto_settings[$code] == 1) $shortcodes_validated[] = $code;
+		if($doroto_settings[$code] == 1) {
+			$shortcodes_validated[] = $code;
+		}
 	}
-	if(empty($shortcodes_validated)) return null;
+	if(empty($shortcodes_validated)) {
+		return null;
+	}
 	
 	$current_slide = sanitize_text_field($doroto_presentation['slide']);
 	
@@ -1752,4 +1969,40 @@ function doroto_change_presentation(){
 	}
 	
 	update_user_meta($current_user_id, 'doroto_presentation', serialize($doroto_presentation));
+}
+
+
+/**
+ * move among tournaments within tournaments list
+ * @since 1.0.0
+ */
+function doroto_move_among_tournaments() {	
+	if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash ( $_POST['_wpnonce'] ) ) , 'doroto_move_among_tournaments_nonce' ) ) {
+        wp_die( esc_html__('Invalid request.','doubles-rotation-tournament' ) );
+    }
+	
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+		$display_rows = intval(doroto_read_settings('display_rows',20));
+		if($display_rows <= 0) {
+			$display_rows = 9999;
+		}
+		
+	    $filter_option = doroto_read_filter_tournament();
+		
+        if (isset($_POST['doroto_decrement_first_id'])) {
+            $filter_option['first_id'] -= $display_rows;
+        } elseif (isset($_POST['doroto_increment_first_id'])) {
+			$filter_option['first_id'] += $display_rows;			
+        }
+		
+		$filter_option['last_id'] = $filter_option['first_id'] + $display_rows - 1;
+    }
+	$tournament_id = doroto_getTournamentId();
+	update_user_meta(get_current_user_id(), 'doroto_filter_tournaments', serialize($filter_option));
+	
+	$output = sanitize_text_field( __("List of available tournaments was updated.", "doubles-rotation-tournament") );
+
+	doroto_info_messsages_save ($output);
+	doroto_redirect_modify_url($tournament_id,"doroto-tournament-selection");
+	exit;
 }

@@ -14,13 +14,19 @@ $delete_pages = intval(doroto_read_settings('delete_pages',1));
 $delete_database = intval(doroto_read_settings('delete_database',0));
 
 if($delete_pages) {
-	$main_page_id = get_option('doroto_main_page_id');
-	$help_page_id = get_option('doroto_help_page_id');
-	$example_page_id = get_option('doroto_example_page_id');
+	$main_page_id = intval( get_option('doroto_main_page_id') );
+	$help_page_id = intval( get_option('doroto_help_page_id') );
+	$example_page_id = intval( get_option('doroto_example_page_id') );
 
-	if (!empty($main_page_id)) wp_delete_post($main_page_id, false);
-	if (!empty($help_page_id)) wp_delete_post($help_page_id, false);
-	if (!empty($example_page_id)) wp_delete_post($example_page_id, false);
+	if (!empty($main_page_id)) {
+		wp_delete_post($main_page_id, false);
+	}
+	if (!empty($help_page_id)) {
+		wp_delete_post($help_page_id, false);
+	}
+	if (!empty($example_page_id)) {
+		wp_delete_post($example_page_id, false);
+	}
 
 	$results = $wpdb->get_results("SELECT page_id FROM {$wpdb->prefix}doroto_tournaments WHERE page_id IS NOT NULL");
 
@@ -36,8 +42,12 @@ if($delete_pages) {
 
 foreach ($options_starting_with_doroto as $option) {
 	$variable = $option->option_name;
-    if(($variable == 'doroto_settings') && $delete_settings == 0) continue;
-	if(($variable == 'doroto_main_page_id' || $variable == 'doroto_help_page_id' || $variable == 'doroto_example_page_id') && $delete_pages == 0) continue;
+    if(($variable == 'doroto_settings') && $delete_settings == 0) {
+		continue;
+	}
+	if(($variable == 'doroto_main_page_id' || $variable == 'doroto_help_page_id' || $variable == 'doroto_example_page_id') && $delete_pages == 0) {
+		continue;
+	}
 	delete_option($option->option_name);
 }
 

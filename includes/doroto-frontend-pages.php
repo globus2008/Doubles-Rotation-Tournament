@@ -1,7 +1,13 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
-//run by hook to update voluntary DoRoTo pages
+
+/**
+ * run by hook to update voluntary DoRoTo pages
+ * @since 1.0.0
+ */
 function doroto_update_pages() {
 	global $wpdb;
 	$update_activation = intval(doroto_read_settings('update_activation',1));
@@ -12,14 +18,20 @@ function doroto_update_pages() {
 	}
 }
 
-//create the main page when activating the plugin
+
+/**
+ * create the main page when activating the plugin
+ * @since 1.0.0
+ */
 function doroto_create_main_page() {
-    $page_id = get_option('doroto_main_page_id');
+    $page_id = intval( get_option('doroto_main_page_id') );
     if ($page_id) {
 		$page = get_post($page_id);
-        if($page) return; 
+        if($page) {
+			return; 
+		}
     }
-    $page_title = esc_html__('Doubles Rotation Tournament', 'doubles-rotation-tournament');
+    $page_title = sanitize_text_field( __('Doubles Rotation Tournament', 'doubles-rotation-tournament') );
 	$page_content = doroto_main_page();
 
     $page = array(
@@ -33,14 +45,20 @@ function doroto_create_main_page() {
     update_option('doroto_main_page_id', $page_id);
 }
 
-// Function to create a help page when activating the plugin
+
+/**
+ * Function to create a help page when activating the plugin
+ * @since 1.0.0
+ */
 function doroto_create_help_page() {
-    $page_id = get_option('doroto_help_page_id');
+    $page_id = intval( get_option('doroto_help_page_id') );
     if ($page_id) {
         $page = get_post($page_id);
-        if($page) return; 
+        if($page) {
+			return; 
+		}
     }
-    $page_title = esc_html__('Rules of the Doubles Rotation Tournament', 'doubles-rotation-tournament');
+    $page_title = sanitize_text_field( __('Rules of the Doubles Rotation Tournament', 'doubles-rotation-tournament') );
 	$page_content = doroto_help_page();
 
     $page = array(
@@ -54,7 +72,11 @@ function doroto_create_help_page() {
     update_option('doroto_help_page_id', $page_id);
 }
 
-//content of main page
+
+/**
+ * content of main page
+ * @since 1.0.0
+ */
 function doroto_main_page() {
 	$output = ""; 
 	$output .= '[doroto_info_messsages]';								 
@@ -110,6 +132,7 @@ function doroto_main_page() {
 	$output .= '[doroto_display_div_last]';
 	
 	$output .= '[doroto_display_div_first label="' . esc_html__('Help ...', 'doubles-rotation-tournament') . '" div_id="doroto-help"]';	
+	
 	$output .= '[doroto_help_main_page]';
 	$output .= '[doroto_display_div_last]';
 	$output .= '[doroto_allow_presentation]';
@@ -118,12 +141,25 @@ function doroto_main_page() {
 	return $output;
 }
 
-//help main page content
+
+/**
+ * help main page content
+ * @since 1.0.0
+ */
 function doroto_help_main_page_shortcode(){
 	$output = '';
-	if(doroto_check_if_presentation_on()) return $output;	
+	if(doroto_check_if_presentation_on()) {
+		return $output;	
+	}
 	doroto_help_page_info ($output);
+	
+	$youtube_link = doroto_read_settings("youtube_link", "");
+	$youtube_link = sanitize_text_field( wp_unslash ( $youtube_link));
 
+	if( $youtube_link != "") {
+		$output .= '<p><a href=" '. esc_attr($youtube_link) .' " target="_blank">' . esc_html__('View the help video in an external window.','doubles-rotation-tournament') .'</a></p>';
+	};
+	
 	$output .= '<p>' . esc_html__('This standalone page will guide you through the entire tournament in all of the following consecutive stages:','doubles-rotation-tournament') . '</p>';
 
 	$output .= '<ol><li>' . esc_html__('Create a new tournament','doubles-rotation-tournament') . '<ul>
@@ -184,13 +220,17 @@ function doroto_help_main_page_shortcode(){
 }
 add_shortcode('doroto_help_main_page', 'doroto_help_main_page_shortcode'); 
 
-//update the main page when activating the plugin
+
+/**
+ * update the main page when activating the plugin
+ * @since 1.0.0
+ */
 function doroto_update_main_page_content_on_activation() {
-    $doroto_main_page_id = get_option('doroto_main_page_id'); 
+    $doroto_main_page_id = intval( get_option('doroto_main_page_id') ); 
 
     if ($doroto_main_page_id) {
         $page_content = doroto_main_page(); 
-		$page_title = esc_html__('Doubles Rotation Tournament', 'doubles-rotation-tournament');
+		$page_title = sanitize_text_field( __('Doubles Rotation Tournament', 'doubles-rotation-tournament') );
         
         $page_data = array(
             'ID'           => $doroto_main_page_id,
@@ -201,13 +241,17 @@ function doroto_update_main_page_content_on_activation() {
     }
 }
 
-//update help page when activating the plugin
+
+/**
+ * update help page when activating the plugin
+ * @since 1.0.0
+ */
 function doroto_update_help_page_content_on_activation() {
-    $doroto_help_page_id = get_option('doroto_help_page_id'); 
+    $doroto_help_page_id = intval( get_option('doroto_help_page_id') ); 
     
     if ($doroto_help_page_id) {
         $page_content = doroto_help_page(); 
-		$page_title = esc_html__('Rules of the Doubles Rotation Tournament', 'doubles-rotation-tournament');
+		$page_title = sanitize_text_field( __('Rules of the Doubles Rotation Tournament', 'doubles-rotation-tournament') );
         
         $page_data = array(
             'ID'           => $doroto_help_page_id,
@@ -218,19 +262,25 @@ function doroto_update_help_page_content_on_activation() {
     }
 }
 
-//create a post with example of a tournament when activating the plugin
+
+/**
+ * create a post with example of a tournament when activating the plugin
+ * @since 1.0.0
+ */
 function doroto_create_example_page() {
     global $wpdb;
-    $page_id = get_option('doroto_example_page_id');
+    $page_id = intval( get_option('doroto_example_page_id') );
     if ($page_id) {
         $page = get_post($page_id);
-        if($page) return; 
+        if($page) {
+			return; 
+		}
     }
 
-    $page_title = esc_html__('Announcement of Doubles Rotation Tournament (Example)', 'doubles-rotation-tournament-example');
+    $page_title = sanitize_text_field( __('Announcement of Doubles Rotation Tournament (Example)', 'doubles-rotation-tournament-example') );
 	$page_content = doroto_tournament_post(1);
 	$tournament = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}doroto_tournaments WHERE id = 1");
-	$invitation = sanitize_text_field($tournament->invitation);
+	$invitation = sanitize_text_field( $tournament->invitation );
 
     $page = array(
         'post_title'    => $page_title,
@@ -253,7 +303,11 @@ function doroto_create_example_page() {
            );
 }
 
-//content of the post with example of a tournament when activating the plugin
+
+/**
+ * content of the post with example of a tournament when activating the plugin
+ * @since 1.0.0
+ */
 function doroto_tournament_post($tournament_id)	{
 	$tournament_id = intval($tournament_id);
 	$output = "
@@ -268,7 +322,7 @@ function doroto_tournament_post($tournament_id)	{
 		<div class='doroto-grey-background'>
 		[doroto_temporary_enable_player tournament_id=\"" . esc_html($tournament_id) . "\"]
 		[doroto_temporary_disable_player tournament_id=\"" . esc_html($tournament_id) . "\"]</div>
-		[doroto_player_filter tournament_id=\"" . esc_html($tournament_id) . "\"]	
+		[doroto_player_filter tournament_id=\"" . esc_html($tournament_id) . "\"] 	
 		<div id='doroto-display-games'>
 		[doroto_display_games only_played=\"0\" tournament_id=\"" . esc_html($tournament_id) . "\"]
 		</div>
@@ -278,13 +332,17 @@ function doroto_tournament_post($tournament_id)	{
 	return $output; 
 }
 
-//update a post with example of a tournament when activating the plugin
+
+/**
+ * update a post with example of a tournament when activating the plugin
+ * @since 1.0.0
+ */
 function doroto_update_example_page_content_on_activation() {
-    $doroto_example_page_id = get_option('doroto_example_page_id'); 
+    $doroto_example_page_id = intval( get_option('doroto_example_page_id') ); 
     
     if ($doroto_example_page_id) {
         $page_content = doroto_tournament_post(1); 
-		$page_title = esc_html__('Announcement of Doubles Rotation Tournament (Example)', 'doubles-rotation-tournament-example');
+		$page_title = sanitize_text_field( __('Announcement of Doubles Rotation Tournament (Example)', 'doubles-rotation-tournament-example') );
         
         $page_data = array(
             'ID'           => $doroto_example_page_id,
@@ -295,7 +353,11 @@ function doroto_update_example_page_content_on_activation() {
     }
 }
 
-//create home page for admin: not used now
+
+/**
+ * create home page for admin: not used now
+ * @since 1.0.0
+ */
 function doroto_home_page()	{
 	$output = ""; 
 	doroto_main_page_info ($output);
@@ -304,7 +366,11 @@ function doroto_home_page()	{
 	return $output;
 }
 
-//content of help page 
+
+/**
+ * content of help page 
+ * @since 1.0.0
+ */
 function doroto_help_page()	{
 	$output = ""; 
 	doroto_main_page_info ($output);
@@ -384,38 +450,54 @@ function doroto_help_page()	{
 	return $output;
 }
 
-//provides a link to help page
+
+/**
+ * provides a link to help page
+ * @since 1.0.0
+ */
 function doroto_help_page_info (&$output) {
-	$page_id = get_option('doroto_help_page_id');
+	$page_id = intval( get_option('doroto_help_page_id') );
 
 	if ($page_id && get_post_status($page_id)) {
-  	  	$page_url = get_permalink($page_id);
-   	  	$output .= '<p><a href="' . esc_url($page_url) . '" data-type="URL" data-id="' . esc_url($page_url) . '">' . esc_html__('Rules for the Doubles Rotating Tournament can be found on a separate page','doubles-rotation-tournament') . '</a>.</p>';	
+  	  	$page_url = sanitize_text_field( wp_unslash( get_permalink($page_id) ));
+   	  	$output .= '<p><a href="' . esc_url($page_url) . '" data-type="URL" data-id="' . esc_url($page_url) . '">' . esc_html__('Rules for the Doubles Rotation Tournament can be found on a separate page','doubles-rotation-tournament') . '</a>.</p>';	
 	} else {
-   	 	$output .= '<p>' . esc_html__('The link to the Rules page for the Doubles Rotating Tournament is currently unavailable.','doubles-rotation-tournament') . '</p>';
+   	 	$output .= '<p>' . esc_html__('The link to the Rules page for the Doubles Rotation Tournament is currently unavailable.','doubles-rotation-tournament') . '</p>';
 	}
 }
 
-//provides a link to main page
+
+/**
+ * provides a link to main page
+ * @since 1.0.0
+ */
 function doroto_main_page_info (&$output) {
-	$page_id = get_option('doroto_main_page_id');
+	$page_id = intval( get_option('doroto_main_page_id') );
 
 	if ($page_id && get_post_status($page_id)) {
-    	$page_url = get_permalink($page_id);
-		$output .= '<p><a href="' . esc_url($page_url) . '" data-type="URL" data-id="' . esc_url($page_url) . '">' . esc_html__('The schedule of Doubles Rotating Tournaments can be found on a separate page','doubles-rotation-tournament') . '</a>.</p>';	
+    	$page_url = sanitize_text_field( wp_unslash( get_permalink($page_id) ));
+		$output .= '<p><a href="' . esc_url($page_url) . '" data-type="URL" data-id="' . esc_url($page_url) . '">' . esc_html__('The schedule of Doubles Rotation Tournaments can be found on a separate page','doubles-rotation-tournament') . '</a>.</p>';	
 	} else {
-    	$output .= '<p>' . esc_html__('The link to the doubles rotating tournament schedule page is currently unavailable.','doubles-rotation-tournament') . '</p>';	
+    	$output .= '<p>' . esc_html__('The link to the doubles rotation tournament schedule page is currently unavailable.','doubles-rotation-tournament') . '</p>';	
 	}
 }
 
-//creation of a new post with a tournament details by users
+
+/**
+ * creation of a new post with a tournament details by users
+ * @since 1.0.0
+ */
 function doroto_create_new_tournament_post($tournament_id) {
 	global $wpdb;
 	$tournament = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}doroto_tournaments WHERE id = $tournament_id");
 	
 	$tournament_name = sanitize_text_field($tournament->name);
-	if(strlen($tournament_name) > 5) $page_name = $tournament_name;
-	else $page_name = esc_html__('DoRoTo', 'doubles-rotation-tournament') . '-' . $tournament_name;
+	if(strlen($tournament_name) > 5) {
+		$page_name = $tournament_name;
+	}
+	else {
+		$page_name = sanitize_text_field( __('DoRoTo', 'doubles-rotation-tournament') . '-' . $tournament_name );
+	}
 	
 	$page_id = intval($tournament->page_id);
 	$invitation = sanitize_text_field($tournament->invitation);

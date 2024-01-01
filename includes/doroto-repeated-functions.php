@@ -1,14 +1,26 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-
-//check if a user is log in 
-function doroto_not_logged_message(){
-	if (isset($_GET['log_in'])) {
-  	  return '<p class="doroto-red-text"><b>' . esc_html__("If you want to register for the tournament, you must log in to your account!", "doubles-rotation-tournament") . '</b></p>';
-	} else return '';
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
 }
 
-//display messages from forms
+
+/**
+ * check if a user is log in
+ * @since 1.0.0
+ */
+function doroto_not_logged_message(){
+	if (isset($_GET['log_in'])) {
+  	  	return '<p class="doroto-red-text"><b>' . esc_html__("If you want to register for the tournament, you must log in to your account!", "doubles-rotation-tournament") . '</b></p>';
+	} else {
+		return '';
+	}
+}
+
+
+/**
+ * display messages from forms
+ * @since 1.0.0
+ */
 function doroto_info_messsages_shortcode (){	
 	global $doroto_output_form;
 	
@@ -18,7 +30,7 @@ function doroto_info_messsages_shortcode (){
 	//support presentation
 	doroto_change_presentation();
 	
-	$current_user_id = get_current_user_id();
+	$current_user_id = intval( get_current_user_id() );
 	if($doroto_output_form =='') {
 		if(!is_user_logged_in()) {
 			$doroto_output_form = get_option('doroto_output_form');
@@ -32,13 +44,29 @@ function doroto_info_messsages_shortcode (){
 		$allowed_html = doroto_allowed_html();
 		$output = '<p class="doroto-red-text">'.wp_kses($doroto_output_form, $allowed_html).'</p>';	
 	}	
-	else $output = '';	
+	else {
+		$output = '';	
+	}
 	$doroto_output_form = '';
+	
+	if (!doroto_current_user_in_tournaments()) {
+		$youtube_link = doroto_read_settings("youtube_link", "");
+		$youtube_link = sanitize_text_field( wp_unslash ( $youtube_link));
+
+		if( $youtube_link != "") {
+			$output .= '<b><p><a href=" '. esc_attr($youtube_link) .' " target="_blank">' . esc_html__('View the help video in an external window.','doubles-rotation-tournament') .'</a></p></b>';
+		};	
+	}
+	
 	return $output;
 }
 add_shortcode('doroto_info_messsages', 'doroto_info_messsages_shortcode');
 
-//save output message to 'usermeta' table
+
+/**
+ * save output message to 'usermeta' table
+ * @since 1.0.0
+ */
 function doroto_info_messsages_save ($output){
 	global $doroto_output_form;
 	$doroto_output_form = $output;	       
@@ -48,11 +76,14 @@ function doroto_info_messsages_save ($output){
 		update_option('doroto_output_form', wp_kses($output, $allowed_html));
 	} else {
 		$current_user = wp_get_current_user();
-		update_user_meta($current_user->ID, 'doroto_output_form', wp_kses($output, $allowed_html));
+		update_user_meta( intval($current_user->ID) , 'doroto_output_form', wp_kses($output, $allowed_html));
 	}
 }
 
-//allow these html entities in strings and posts
+/**
+ * allow these html entities in strings and posts
+ * @since 1.0.0
+ */
 function doroto_allowed_html() {
     $allowed_html = array(
         'a' => array(
@@ -106,13 +137,16 @@ function doroto_allowed_html() {
 }
 
 
-//get tournament ID
+/**
+ * get tournament ID
+ * @since 1.0.0
+ */
 function doroto_getTournamentId() {
     global $wpdb;
 	global $doroto_pernament_tournament_id;
 
     $current_user = wp_get_current_user();
-    $userId = $current_user->ID;
+    $userId = intval( $current_user->ID );
     $table_name = $wpdb->prefix . 'doroto_tournaments';
 	
     // We will try to get the tournament_id from the URL if it is available
@@ -122,9 +156,13 @@ function doroto_getTournamentId() {
     		"SELECT * FROM $table_name WHERE id = %d",
     		$tournament_id
 		));
-        if($exists) return $tournament_id;
+        if($exists) {
+			return $tournament_id;
+		}
     }
-	if ($doroto_pernament_tournament_id != 0) return $doroto_pernament_tournament_id; //returning a global variable
+	if ($doroto_pernament_tournament_id != 0) {
+		return $doroto_pernament_tournament_id; //returning a global variable
+	}
 	
     // We will try to get the highest tournament ID where close_tournament = 0 and the player is present
 	$sql = $wpdb->prepare(
@@ -134,7 +172,7 @@ function doroto_getTournamentId() {
 
     $result = $wpdb->get_row($sql);
 	if ($result && $result->max_id != null) {
-        $doroto_pernament_tournament_id = $result->max_id;
+        $doroto_pernament_tournament_id = intval( $result->max_id );
         return $doroto_pernament_tournament_id;
     }
 
@@ -142,14 +180,14 @@ function doroto_getTournamentId() {
     $sql = "SELECT MAX(id) as max_id FROM $table_name WHERE close_tournament = 0";
     $result = $wpdb->get_row($sql);
     if ($result && $result->max_id != null) {
-        return $result->max_id;
+        return intval( $result->max_id );
     }
 
     // If all else fails, let's take the highest ID ever
     $sql = "SELECT MAX(id) as max_id FROM $table_name";
     $result = $wpdb->get_row($sql);
     if ($result && $result->max_id != null) {
-        return $result->max_id;
+        return intval( $result->max_id );
     } else {
         // If the table is empty, we return '0'
         return 0;
@@ -157,12 +195,16 @@ function doroto_getTournamentId() {
 	return 0;
 }
 
-//return diplay_name in full or short version
+
+/**
+ * return diplay_name in full or short version
+ * @since 1.0.0
+ */
 function doroto_find_player_name ($player_id,$whole_names) {
 	global $wpdb;
 	$user_data = get_userdata($player_id);
 	if ($user_data) {
-   		$display_name = $user_data->display_name;
+   		$display_name = sanitize_text_field( $user_data->display_name );
 		if ($whole_names == 0) {
    			$output = doroto_display_short_name($display_name);
 		} else {
@@ -171,10 +213,18 @@ function doroto_find_player_name ($player_id,$whole_names) {
 	} else {
     	$output = esc_html__('Unknown player', 'doubles-rotation-tournament');
 	}
+	$max_length = intval(doroto_read_settings('player_name_length', 16));
+	if (strlen($output) > $max_length) {
+   		$output = substr($output, 0, $max_length);
+	}
 	return $output;
 }
 
-//shorten display name
+
+/**
+ * shorten display name
+ * @since 1.0.0
+ */
 function doroto_display_short_name($display_name){
 	if(mb_strlen($display_name, 'UTF-8') > 8) {
   		$first_part = mb_substr($display_name, 0, 4, 'UTF-8');
@@ -185,22 +235,31 @@ function doroto_display_short_name($display_name){
 	return $display_name;
 }
 
-//in case of erased user name from a database then return unknown user
+
+/**
+ * in case of erased user name from a database then return unknown user
+ * @since 1.0.0
+ */
 function doroto_get_also_false_user($player) {
     $user = get_user_by('id', $player);
 	if ($user === false) {
     	$user = new stdClass();
-		$user->display_name = esc_html__('Unknown player', 'doubles-rotation-tournament');
-		$user->ID = $player;
+		$user->display_name = sanitize_text_field( __('Unknown player', 'doubles-rotation-tournament') );
+		$user->ID = intval( $player );
 	}
 	return $user;
 }
 
-//from id prepare tournament data
+/**
+ * from id prepare tournament data
+ * @since 1.0.0
+ */
 function doroto_prepare_tournament ($tournament_id){
 	global $wpdb;
 	$tournament_id = intval($tournament_id);
-	if($tournament_id <= 0) return null;
+	if($tournament_id <= 0) {
+		return null;
+	}
 	
     $table_name = $wpdb->prefix . 'doroto_tournaments';
     $tournament = $wpdb->get_row($wpdb->prepare(
@@ -210,30 +269,36 @@ function doroto_prepare_tournament ($tournament_id){
 	return $tournament;
 }
 
-//work with url and reload the page
+
+/**
+ * work with url and reload the page
+ * @since 1.0.0
+ */
 function doroto_redirect_modify_url($tournament_id, $container = '') {
     global $wpdb;
     $tournament_id = intval($tournament_id);
 
     // Get the current URL
     if (isset($_SERVER['HTTP_REFERER'])) {
-        $current_url = esc_url($_SERVER['HTTP_REFERER']);
+        $current_url = sanitize_text_field(wp_unslash($_SERVER['HTTP_REFERER']));
     } else {
         // Get page id from options
-        $doroto_main_page_id = get_option('doroto_main_page_id');
+        $doroto_main_page_id = intval( get_option('doroto_main_page_id') );
 
         // Checking if the page with this ID exists
         if ($doroto_main_page_id && get_post($doroto_main_page_id)) {
             // It exists, so we get the URL
-            $current_url = get_permalink($doroto_main_page_id);
+            $current_url = sanitize_text_field(wp_unslash( get_permalink($doroto_main_page_id) ));
         } else {
             // The page with the given ID does not exist
-            $current_url = home_url('/');
+            $current_url = sanitize_text_field(wp_unslash( home_url('/') ));
         }
     }
 
     $new_url = strtok($current_url, '?');
-    if ($tournament_id == 0) $tournament_id = isset($_GET['tournament_id']) ? intval($_GET['tournament_id']) : '';
+    if ($tournament_id == 0) {
+		$tournament_id = isset($_GET['tournament_id']) ? intval($_GET['tournament_id']) : '';
+	}
 
     if (!empty($tournament_id)) {
         $new_url .= "?tournament_id=$tournament_id";
@@ -247,10 +312,14 @@ function doroto_redirect_modify_url($tournament_id, $container = '') {
     exit;
 }
 
-//checking if the player is an administrator
-//output 0: is not admin
-//output 1: is admin in DoRoTo
-//output 2: is admin in DoRoTo or a web administrator
+
+/**
+ * checking if the player is an administrator
+ * @since 1.0.0
+ * output 0: is not admin
+ * output 1: is admin in DoRoTo
+ * output 2: is admin in DoRoTo and a web administrator
+ */
 function doroto_is_admin ($tournament_id){
 	global $wpdb;
     $current_user = wp_get_current_user();
@@ -283,21 +352,37 @@ function doroto_is_admin ($tournament_id){
 	}
 }
 
-//display player name as an output
+
+/**
+ * display player name as an output
+ * @since 1.0.0
+ */
 function doroto_output_player_data (&$output,$match,$player,$special_group,$whole_names,$mark_user){
 	$user = doroto_get_also_false_user($match[$player]);
 
 	if($mark_user == $match[$player]) {
-		if (in_array($match[$player], $special_group)) $output  .= '<td class="doroto-special-group-text-underlined">';
-   		else $output  .= '<td class="doroto-text-underlined">';			
+		if (in_array($match[$player], $special_group)) {
+			$output  .= '<td class="doroto-special-group-text-underlined">';
+		}
+   		else {
+			$output  .= '<td class="doroto-text-underlined">';
+		}
 	} else {
-		if (in_array($match[$player], $special_group)) $output  .= '<td class="doroto-special-group-text">';
-   		else $output  .= '<td>';		
+		if (in_array($match[$player], $special_group)) {
+			$output  .= '<td class="doroto-special-group-text">';
+		}
+   		else {
+			$output  .= '<td>';	
+		}
 	}
-	$output .= esc_html(doroto_find_player_name($user->ID, $whole_names)) . "</td>";
+	$output .= esc_html( doroto_find_player_name( intval($user->ID) , intval( $whole_names ) )) . "</td>";
 }
 
-//read a variable from wp option table
+
+/**
+ * read a variable from wp option table
+ * @since 1.0.0
+ */
 function doroto_read_settings($variable, $default_value) {
     $doroto_settings = get_option('doroto_settings');
 
@@ -308,25 +393,37 @@ function doroto_read_settings($variable, $default_value) {
     return $default_value;
 }
 
-//check if shortcode should be displayed or not because of a presentation
+
+/**
+ * check if shortcode should be displayed or not because of a presentation
+ * @since 1.0.0
+ */
 function doroto_check_need_to_display($shortcode) {
 	global $wpdb;
-	$current_user_id = get_current_user_id();
+	$current_user_id = intval( get_current_user_id() );
 	$display_shortcode = intval(doroto_read_settings($shortcode, 1));
 	$doroto_presentation = maybe_unserialize(get_user_meta($current_user_id, 'doroto_presentation', true));	
 	if($doroto_presentation && is_array($doroto_presentation)){
-		if($doroto_presentation['allow_to_run'] == 1 && ($doroto_presentation['slide'] != $shortcode || !$display_shortcode)) return 0;        	
+		if($doroto_presentation['allow_to_run'] == 1 && ($doroto_presentation['slide'] != $shortcode || !$display_shortcode)) {
+			return 0; 
+		}
 	};	
 	return 1;
 }
 
-//is presentation running?
+
+/**
+ * is presentation running?
+ * @since 1.0.0
+ */
 function doroto_check_if_presentation_on() {
 	global $wpdb;
-	$current_user_id = get_current_user_id();
+	$current_user_id = intval( get_current_user_id() );
 	$doroto_presentation = maybe_unserialize(get_user_meta($current_user_id, 'doroto_presentation', true));	
 	if($doroto_presentation && is_array($doroto_presentation)){
-		if($doroto_presentation['allow_to_run'] == 1) return 1;        	
+		if($doroto_presentation['allow_to_run'] == 1) {
+			return 1;  
+		}
 	};	
 	return 0;
 }
